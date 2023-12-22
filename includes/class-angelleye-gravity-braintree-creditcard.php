@@ -67,10 +67,9 @@ if ( ! class_exists( 'Angelleye_Gravity_Braintree_CreditCard_Field' ) ) {
 		 * @return false|string
 		 * @throws \Braintree\Exception\Configuration
 		 */
-		public function get_field_input( $form, $value = '', $entry = null ) {
+        public function get_field_input( $form, $value = '', $entry = null ) {
 
             $html = '';
-
             try {
 
                 $is_entry_detail = $this->is_entry_detail();
@@ -84,16 +83,146 @@ if ( ! class_exists( 'Angelleye_Gravity_Braintree_CreditCard_Field' ) ) {
                 $Plugify_GForm_Braintree = new Plugify_GForm_Braintree();
                 $gateway                 = $Plugify_GForm_Braintree->getBraintreeGateway();
                 $clientToken             = $gateway->clientToken()->generate();
+
                 ob_start();
 
+                $product_fields = get_product_fields_by_form_id( $form_id );
+                $extra_fees = angelleye_get_extra_fees( $form_id );
+
+                $gfb_obj = [
+                    'ajax_url' => admin_url( 'admin-ajax.php' ),
+                    'form_id' => $form_id,
+                    'is_fees_enable' => !empty( $extra_fees['is_fees_enable'] ) ? $extra_fees['is_fees_enable'] : false,
+                    'card_type' => $this->type,
+                ];
+
+                if( !empty( $product_fields ) ) {
+                    $gfb_obj = array_merge($gfb_obj, $product_fields);
+                }
                 ?>
                 <div class='ginput_container gform_payment_method_options ginput_container_<?php echo $this->type; ?>'
                      id='<?php echo $field_id; ?>'>
                     <div id="dropin-container"></div>
                     <input type="hidden" id="nonce" name="payment_method_nonce"/>
+                    <input type="hidden" id="payment_card_type" name="payment_card_type"/>
                 </div>
                 <script type="text/javascript">
-                    // const form = document.getElementById('gform_<?php echo $form_id; ?>');
+                    var gfbObj = <?php echo json_encode($gfb_obj); ?>;
+
+                    function manageGfromFields( is_preview = false ) {
+
+                        const form = document.getElementById('gform_<?php echo $form_id; ?>');
+                        let cardTypeEl = form.querySelectorAll('.gfield--type-'+gfbObj.card_type);
+                        if( undefined !== cardTypeEl  &&  null !== cardTypeEl ) {
+                            cardTypeEl.forEach(function(element) {
+                                if( is_preview ) {
+                                    element.style.display = 'none';
+                                } else {
+                                    element.style.display = 'block';
+                                }
+                            });
+                        }
+
+                        let gformFields = document.getElementById('gform_fields_<?php echo $form_id; ?>');
+                        if( undefined !== gformFields && null !== gformFields ) {
+                            gformFields.classList.add('fields-preview');
+                            var inputElements = gformFields.querySelectorAll('input, input[type="text"], input[type="number"], input[type="radio"], input[type="checkbox"], select, textarea');
+                            inputElements.forEach(function(element) {
+                                if( is_preview ) {
+                                    element.readOnly = true;
+                                    element.disabled = true;
+                                } else {
+                                    element.readOnly = false;
+                                    element.disabled = false;
+                                }
+                            });
+                        }
+
+                        let gformFooter = form.querySelectorAll('.gform_footer');
+                        if( undefined !== gformFooter  &&  null !== gformFooter ) {
+                            gformFooter.forEach(function(footer) {
+                                if( is_preview ) {
+                                    footer.style.display = 'none';
+                                } else {
+                                    footer.style.display = 'block';
+                                }
+                            });
+                        }
+
+                        let gformPreview = document.getElementById('gform_preview_<?php echo $form_id; ?>');
+                        if( undefined !== gformPreview && null !== gformPreview ) {
+                            if( is_preview ) {
+                                gformPreview.style.display = 'block';
+                            } else {
+                                gformPreview.style.display = 'none';
+                            }
+                        }
+
+                        let gformSpinner = document.getElementById('gform_ajax_spinner_<?php echo $form_id; ?>');
+                        if (undefined !== gformSpinner && null !== gformSpinner) {
+                            gformSpinner.remove();
+                        }
+                    }
+
+                    function managePreviewBeforePayment( payload ) {
+
+                        displayPaymentPreview(payload);
+                        manageGfromFields(true);
+                    }
+
+                    function displayPaymentPreview( payload ) {
+
+                        if( undefined !== payload.type && null !== payload.type  ) {
+
+                            jQuery.ajax({
+                                type: 'POST',
+                                dataType: 'json',
+                                url: gfbObj.ajax_url,
+                                data: {
+                                    action: 'gform_payment_preview_html',
+                                    nonce: '<?php echo wp_create_nonce('preview-payment-nonce'); ?>',
+                                    card_type: payload.type,
+                                    form_id: <?php echo $form_id; ?>,
+                                    form_data: jQuery('#gform_<?php echo $form_id; ?>').serializeArray()
+                                },
+                                success: function ( result ) {
+                                    if(result.status) {
+                                        let gFormPreview = document.getElementById('gform_preview_<?php echo $form_id; ?>');
+                                        gFormPreview.innerHTML = result.html;
+                                        managePaymentActions();
+                                    } else {
+                                        location.reload();
+                                    }
+                                }
+                            });
+                        }
+                    }
+
+                    function managePaymentActions() {
+                        let paymentCancel = document.getElementById('gform_payment_cancel_<?php echo $form_id; ?>');
+                        if( undefined !== paymentCancel && null !== paymentCancel ) {
+                            paymentCancel.addEventListener('click', function () {
+                                location.reload();
+                            });
+                        }
+
+                        let paymentProcess = document.getElementById('gform_payment_pay_<?php echo $form_id; ?>');
+                        if( undefined !== paymentProcess && null !== paymentProcess ) {
+                            paymentProcess.addEventListener('click', function () {
+                                manageGfromFields();
+                                document.getElementById('gform_<?php echo $form_id; ?>').submit();
+                            });
+                        }
+                    }
+
+                    if( gfbObj.is_fees_enable ) {
+                        let gFormFields = document.getElementById('gform_fields_<?php echo $form_id; ?>');
+                        let previewHtmlField = document.createElement("div");
+                        previewHtmlField.id = 'gform_preview_<?php echo $form_id; ?>';
+                        previewHtmlField.classList.add('gform-preview');
+                        gFormFields.appendChild(previewHtmlField);
+                    }
+
                     if(typeof braintree === 'undefined') {
                         // console.log("Braintree is not loaded yet. Loading...");
                         var script = document.createElement('script');
@@ -111,7 +240,12 @@ if ( ! class_exists( 'Angelleye_Gravity_Braintree_CreditCard_Field' ) ) {
                                     dropinInstance.requestPaymentMethod((error, payload) => {
                                         if (error) console.error(error);
                                         document.getElementById('nonce').value = payload.nonce;
-                                        document.getElementById('gform_<?php echo $form_id; ?>').submit();
+                                        document.getElementById('payment_card_type').value = payload.type;
+                                        if( gfbObj.is_fees_enable ) {
+                                            managePreviewBeforePayment(payload);
+                                        } else {
+                                            document.getElementById('gform_<?php echo $form_id; ?>').submit();
+                                        }
                                     });
                                 });
                             });
@@ -130,8 +264,14 @@ if ( ! class_exists( 'Angelleye_Gravity_Braintree_CreditCard_Field' ) ) {
 
                                 dropinInstance.requestPaymentMethod((error, payload) => {
                                     if (error) console.error(error);
+                                    console.log(payload);
                                     document.getElementById('nonce').value = payload.nonce;
-                                    document.getElementById('gform_<?php echo $form_id; ?>').submit();
+                                    document.getElementById('payment_card_type').value = payload.type;
+                                    if( gfbObj.is_fees_enable ) {
+                                        managePreviewBeforePayment(payload);
+                                    } else {
+                                        document.getElementById('gform_<?php echo $form_id; ?>').submit();
+                                    }
                                 });
                             });
                         });
@@ -140,12 +280,13 @@ if ( ! class_exists( 'Angelleye_Gravity_Braintree_CreditCard_Field' ) ) {
                 <?php
                 $html = ob_get_contents();
                 ob_get_clean();
+
             } catch (Exception $e) {
 
                 return sprintf( esc_html__("Something went wrong. Please check merchant account details %s.", "angelleye-gravity-forms-braintree"), '<a href="'.esc_url( admin_url( 'admin.php?page=gf_settings&subview=gravity-forms-braintree' ) ).'">'.esc_html__('here', 'angelleye-gravity-forms-braintree').'</a>');
             }
 
-			return $html;
-		}
+            return $html;
+        }
 	}
 }

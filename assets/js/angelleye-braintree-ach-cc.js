@@ -30,16 +30,25 @@ jQuery(document).ready(function ($) {
         }
     }
 
-
-
     $('.custom_ach_form_submit_btn').click(function (e) {
         window[ 'gf_submitting_' + $("input[name='gform_submit']").val() ] = true;
         $('#gform_ajax_spinner_' + $("input[name='gform_submit']").val()).remove();
         e.preventDefault();
+
         var curlabel = $(this).html();
         var form = $(this).closest('form');
 
+        let form_id = form.find('input[name="gform_submit"]').val();
         var selectedradio = form.find('.gform_payment_method_options input[type=radio]:checked').val();
+
+        if( $('#gform_preview_'+form_id).length === 0 ) {
+
+            let gFormFields = document.getElementById('gform_fields_'+form_id);
+            let previewHtmlField = document.createElement("div");
+            previewHtmlField.id = 'gform_preview_'+form_id;
+            previewHtmlField.classList.add('gform-preview');
+            gFormFields.appendChild(previewHtmlField);
+        }
 
         var check_if_ach_form = form.find('.ginput_ach_form_container');
         if (check_if_ach_form.length && (selectedradio === 'braintree_ach' || check_if_ach_form.closest('.gfield').css('display') !== 'none')) {
@@ -187,11 +196,37 @@ jQuery(document).ready(function ($) {
                                 return;
                             }
 
+                            let card_type = 'ACH';
                             form.append("<input type='hidden' name='ach_device_corelation' value='" + deviceData + "' />");
                             form.append('<input type="hidden" name="ach_token" value="' + tokenizedPayload.nonce + '" />');
+                            form.append('<input type="hidden" name="ach_card_type" value="'+card_type+'" />');
 
-
-                            form.submit();
+                            jQuery.ajax({
+                                type: 'POST',
+                                dataType: 'json',
+                                url: angelleye_gravity_form_braintree_ach_handler_strings.ajax_url,
+                                data: {
+                                    action: 'gform_payment_preview_html',
+                                    nonce: angelleye_gravity_form_braintree_ach_handler_strings.ach_bt_nonce,
+                                    card_type: card_type,
+                                    form_id: form_id,
+                                    form_data: jQuery('#gform_'+form_id).serializeArray()
+                                },
+                                success: function ( result ) {
+                                    if(result.status) {
+                                        if( result.extra_fees_enable ) {
+                                            let gFormPreview = document.getElementById('gform_preview_'+form_id);
+                                            gFormPreview.innerHTML = result.html;
+                                            manageACHGfromFields(form_id, true);
+                                            manageACHPaymentActions(form_id);
+                                        } else {
+                                            form.submit();
+                                        }
+                                    } else {
+                                        location.reload();
+                                    }
+                                }
+                            });
                         });
                     });
                 });
@@ -202,6 +237,79 @@ jQuery(document).ready(function ($) {
         }
     });
 });
+
+function manageACHPaymentActions(form_id) {
+    let paymentCancel = document.getElementById('gform_payment_cancel_'+form_id);
+    if( undefined !== paymentCancel && null !== paymentCancel ) {
+        paymentCancel.addEventListener('click', function () {
+            location.reload();
+        });
+    }
+
+    let paymentProcess = document.getElementById('gform_payment_pay_'+form_id);
+    if( undefined !== paymentProcess && null !== paymentProcess ) {
+        paymentProcess.addEventListener('click', function () {
+            manageACHGfromFields(form_id);
+            document.getElementById('gform_'+form_id).submit();
+        });
+    }
+}
+
+function manageACHGfromFields( form_id, is_preview = false ) {
+
+    const form = document.getElementById('gform_'+form_id);
+
+    let gformFields = document.getElementById('gform_fields_'+form_id);
+    if( undefined !== gformFields && null !== gformFields ) {
+        gformFields.classList.add('fields-preview');
+        var inputElements = gformFields.querySelectorAll('input, input[type="text"], input[type="number"], input[type="radio"], input[type="checkbox"], select, textarea');
+        inputElements.forEach(function(element) {
+            if( is_preview ) {
+                element.readOnly = true;
+                element.disabled = true;
+            } else {
+                element.readOnly = false;
+                element.disabled = false;
+            }
+        });
+    }
+
+    let gfieldBraintreeCC = form.querySelectorAll('.gfield--type-braintree_credit_card');
+    if( undefined !== gfieldBraintreeCC  &&  null !== gfieldBraintreeCC ) {
+        gfieldBraintreeCC.forEach(function(BraintreeCC) {
+            if( is_preview ) {
+                BraintreeCC.style.display = 'none';
+            } else {
+                BraintreeCC.style.display = 'block';
+            }
+        });
+    }
+
+    let gformFooter = form.querySelectorAll('.gform_footer');
+    if( undefined !== gformFooter  &&  null !== gformFooter ) {
+        gformFooter.forEach(function(footer) {
+            if( is_preview ) {
+                footer.style.display = 'none';
+            } else {
+                footer.style.display = 'block';
+            }
+        });
+    }
+
+    let gformPreview = document.getElementById('gform_preview_'+form_id);
+    if( undefined !== gformPreview && null !== gformPreview ) {
+        if( is_preview ) {
+            gformPreview.style.display = 'block';
+        } else {
+            gformPreview.style.display = 'none';
+        }
+    }
+
+    let gformSpinner = document.getElementById('gform_ajax_spinner_'+form_id);
+    if (undefined !== gformSpinner && null !== gformSpinner) {
+        gformSpinner.remove();
+    }
+}
 
 function stateNameToAbbreviation(name) {
     let states = {

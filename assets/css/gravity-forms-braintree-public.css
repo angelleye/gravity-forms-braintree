@@ -1,0 +1,5 @@
+.gform-preview {grid-column: 1/-1;}
+.gform-preview table {width: 100%;margin: 1rem 0;}
+.gform-preview table th, .gform-preview strong {font-weight: bold;}
+.gform-preview table td, .gform-preview table th {border: 1px solid #CCC;padding: 1rem;}
+.gform-preview .summary-actions {display: flex;gap: 2rem;justify-content: center;}

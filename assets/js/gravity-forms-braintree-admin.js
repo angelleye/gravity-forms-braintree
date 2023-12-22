@@ -74,3 +74,25 @@ jQuery(document).ready(function ($) {
 
     })
 });
+
+setTimeout(function() {
+    function manageExtraFeesFields( is_enable = false ) {
+        let extraFeesFields = document.querySelectorAll('input.extra-fees-input');
+        if( undefined !== extraFeesFields && extraFeesFields.length > 0 ) {
+            extraFeesFields.forEach(function ( field ){
+                if(is_enable) {
+                    field.setAttribute('readonly', 'readonly');
+                } else {
+                    field.removeAttribute('readonly');
+                }
+            });
+        }
+    }
+    let disableExtraFee = document.getElementById('disable_extra_fees');
+    if( undefined !== disableExtraFee && null !== disableExtraFee ) {
+        manageExtraFeesFields(disableExtraFee.checked);
+        disableExtraFee.addEventListener('click', function (e) {
+            manageExtraFeesFields(disableExtraFee.checked);
+        });
+    }
+}, 500);
