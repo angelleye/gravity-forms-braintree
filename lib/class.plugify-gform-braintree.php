@@ -683,6 +683,37 @@ final class Plugify_GForm_Braintree extends GFPaymentAddOn {
 
         $settings = $this->add_field_after('setupFee', $api_settings_field, $settings);
 
+        if( !empty( $settings ) && is_array( $settings ) ) {
+
+            $temp_settings = [];
+
+            $merchant_settings = [
+                'title'      => esc_html__( 'Merchant Account Settings', 'angelleye-gravity-forms-braintree' ),
+                'fields' => [
+                    [
+                        'name'          => 'sub_merchant_account_id',
+                        'label'         => esc_html__( 'Merchant Account ID', 'angelleye-gravity-forms-braintree' ),
+                        'type'          => 'select',
+                        'choices'       => $this->merchant_account_choices(),
+                        'required'      => false,
+                        'default_value' => '',
+                        'tooltip'       => ''
+                    ]
+                ],
+            ];
+
+            foreach ( $settings as $setting ) {
+
+                if( !empty( $setting ) && $setting['title'] === 'Other Settings' ) {
+                    $temp_settings[] = $merchant_settings;
+                }
+
+                $temp_settings[] = $setting;
+            }
+
+            $settings = $temp_settings;
+        }
+
         // Return sanitized settings
         return $settings;
     }
@@ -1188,12 +1219,52 @@ final class Plugify_GForm_Braintree extends GFPaymentAddOn {
      */
     public function manage_braintree_request_parameter( $request_args, $data, $form, $entry ) {
 
-        $merchant_account_id = !empty( $form['sub_merchant_account_id'] ) ? $form['sub_merchant_account_id'] : '';
+        $payment_feed = $this->get_payment_feed([], $form);
+        $feed_meta = !empty( $payment_feed['meta'] ) ? $payment_feed['meta'] : '';
 
-        if( !empty( $merchant_account_id ) ) {
-            $request_args['merchantAccountId'] = $merchant_account_id;
+        if( !empty( $feed_meta['sub_merchant_account_id'] ) ) {
+            $request_args['merchantAccountId'] = $feed_meta['sub_merchant_account_id'];
         }
 
         return $request_args;
+    }
+
+    /**
+     * Get all sub merchant accounts using primary account.
+     *
+     * @return array $merchant_accounts
+     */
+    public function merchant_account_choices() {
+
+        $merchant_accounts = [
+            [
+                'label' => esc_html__( 'Select Merchant Account ID', 'angelleye-gravity-forms-braintree' ),
+                'value' => ''
+            ]
+        ];
+
+        try {
+
+            $gateway = $this->getBraintreeGateway();
+
+            if ( ! empty( $gateway ) ) {
+
+                $subMerchantAccounts = $gateway->merchantAccount()->all();
+
+                foreach ( $subMerchantAccounts as $account ) {
+
+                    $account_id = !empty( $account->id ) ? $account->id : '';
+                    $account_currency = !empty( $account->currencyIsoCode ) ? $account->currencyIsoCode : '';
+                    $merchant_accounts[] = [
+                        'label' => sprintf('%s - [%s]', $account_id, $account_currency),
+                        'value' => $account_id
+                    ];
+                }
+            }
+        } catch (Exception $exception) {
+
+        }
+
+        return $merchant_accounts;
     }
 }

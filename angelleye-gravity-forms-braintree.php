@@ -62,12 +62,10 @@ class AngelleyeGravityFormsBraintree{
 
         add_action('plugins_loaded', [$this, 'requirementCheck']);
 	    add_action( 'wp_enqueue_scripts', [$this, 'enqueue_scripts']);
-	    add_action( 'gform_form_settings_fields', [$this, 'gform_form_settings_fields']);
         add_action( 'gform_form_settings_fields', [$this, 'extra_fees_form_fields']);
         add_action('wp_ajax_gform_payment_preview_html', [ $this, 'gform_payment_preview_html']);
         add_action('wp_ajax_nopriv_gform_payment_preview_html', [ $this, 'gform_payment_preview_html']);
     }
-
 
     public function enqueue_scripts() {
         wp_enqueue_style('gravity-forms-braintree', GRAVITY_FORMS_BRAINTREE_ASSET_URL . 'assets/css/gravity-forms-braintree-public.css');
@@ -140,93 +138,6 @@ class AngelleyeGravityFormsBraintree{
         $is_active = $wpdb->get_var("select is_active from ".$addon_feed_table_name." where addon_slug='gravity-forms-braintree' and is_active=1");
 
         return $is_active=='1';
-    }
-
-    /**
-     * Added Merchant Account setting fields in Gravity form.
-     *
-     * @param array $fields get fields.
-     * @return array $fields
-     */
-    public function gform_form_settings_fields( $fields ) {
-
-        $merchant_settings = [
-            'title'      => esc_html__( 'Merchant Account Settings', 'angelleye-gravity-forms-braintree' ),
-            'fields' => [
-                [
-                    'name'          => 'sub_merchant_account_id',
-                    'label'         => esc_html__( 'Merchant Account ID', 'angelleye-gravity-forms-braintree' ),
-                    'type'          => 'select',
-                    'choices'       => $this->merchant_account_choices(),
-                    'required'      => false,
-                    'default_value' => '',
-                    'tooltip'       => ''
-                ]
-            ],
-        ];
-
-        $setting_key = 'merchant_account';
-
-        if (! empty( $fields['form_button'] ) ) {
-
-            $new_fields = [];
-            foreach ( $fields as $key => $field ) {
-
-                if( $key === 'form_button' ) {
-
-                    $new_fields[$setting_key] = $merchant_settings;
-
-                }
-
-                $new_fields[$key] = $field;
-            }
-
-            $fields = $new_fields;
-        } else {
-            $fields[$setting_key] = $merchant_settings;
-        }
-
-        return $fields;
-    }
-
-    /**
-     * Get all sub merchant accounts using primary account.
-     *
-     * @return array $merchant_accounts
-     */
-    public function merchant_account_choices() {
-
-        $merchant_accounts = [
-            [
-                'label' => esc_html__( 'Select Merchant ID', 'angelleye-gravity-forms-braintree' ),
-                'value' => ''
-            ]
-        ];
-
-        try {
-
-            $gform_braintree = new Plugify_GForm_Braintree();
-            $gateway = $gform_braintree->getBraintreeGateway();
-
-            if ( ! empty( $gateway ) ) {
-
-                $subMerchantAccounts = $gateway->merchantAccount()->all();
-
-                foreach ( $subMerchantAccounts as $account ) {
-
-                    $account_id = !empty( $account->id ) ? $account->id : '';
-                    $account_currency = !empty( $account->currencyIsoCode ) ? $account->currencyIsoCode : '';
-                    $merchant_accounts[] = [
-                        'label' => sprintf('%s - [%s]', $account_id, $account_currency),
-                        'value' => $account_id
-                    ];
-                }
-            }
-        } catch (Exception $exception) {
-
-        }
-
-        return $merchant_accounts;
     }
 
     public function extra_fees_form_fields( $fields ) {
