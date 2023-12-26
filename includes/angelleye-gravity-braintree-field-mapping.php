@@ -167,68 +167,95 @@ class AngelleyeGravityBraintreeFieldMapping
 
     public function manage_convenience_fees( $args, $submission_data, $form, $entry ) {
 
+        if( ! function_exists('angelleye_get_extra_fees') ) {
+            require_once GRAVITY_FORMS_BRAINTREE_DIR_PATH.'includes/angelleye-functions.php';
+        }
+
         $form_id = absint( rgar( $form, 'id' ) );
         $extra_fees = angelleye_get_extra_fees( $form_id );
+        $extra_fees_label = !empty( $extra_fees['title'] ) ? $extra_fees['title'] : '';
 
-        if( !empty( $extra_fees['is_fees_enable'] ) ) {
+        $card_type = !empty( $_POST['payment_card_type'] ) ? $_POST['payment_card_type'] : '';
+        if( !empty( $_POST['ach_token'] ) ) {
+            $card_type = !empty( $_POST['ach_card_type'] ) ? $_POST['ach_card_type'] : '';
+        }
 
-            $product_fields = get_product_fields_by_form_id( $form_id );
-            $product_group = !empty( $product_fields['group'] ) ? $product_fields['group'] : '';
-            $price_id = !empty( $product_fields['price_id'] ) ? $product_fields['price_id'] : '';
-            $quantity_id = !empty( $product_fields['quantity_id'] ) ? $product_fields['quantity_id'] : '';
+        $product_fields = get_product_fields_by_form_id( $form_id );
+        $products = [];
+        if( !empty( $product_fields ) && is_array( $product_fields ) ) {
 
-            if( !empty( $product_group ) && $product_group === 'multiple' ) {
-                $price_id = !empty( $product_fields['price_id'] ) ? str_replace('.', '_', $product_fields['price_id'] ) : '';
-                $quantity_id = !empty( $product_fields['quantity_id'] ) ? str_replace('.', '_', $product_fields['quantity_id'] ) : '';
-            }
+            foreach ( $product_fields as $product_field ) {
 
-            $product_price = !empty( $_POST[$price_id] ) ? get_price_without_fomatter( $_POST[$price_id] ) : 0;
-            $product_qty = !empty( $_POST[$quantity_id] ) ? $_POST[$quantity_id] : 1;
+                $label = !empty($product_field['label']) ? $product_field['label'] : '';
+                $product_group = !empty($product_field['group']) ? $product_field['group'] : '';
+                $price_id = !empty($product_field['price_id']) ? $product_field['price_id'] : '';
+                $quantity_id = !empty($product_field['quantity_id']) ? $product_field['quantity_id'] : '';
 
-            $card_type = !empty( $_POST['payment_card_type'] ) ? $_POST['payment_card_type'] : '';
-            if( !empty( $_POST['ach_token'] ) ) {
-                $card_type = !empty( $_POST['ach_card_type'] ) ? $_POST['ach_card_type'] : '';
-            }
+                if( !empty( $product_group ) && $product_group === 'multiple' ) {
+                    $price_id = !empty( $product_field['price_id'] ) ? get_product_field_filter( $product_field['price_id'] ) : '';
+                    $quantity_id = !empty( $product_field['quantity_id'] ) ? get_product_field_filter( $product_field['quantity_id'] ) : '';
+                }
 
-            $cart_prices = get_gfb_prices([
-                'form_id' => $form_id,
-                'product_price' => $product_price,
-                'product_qty' => $product_qty,
-                'card_type' => $card_type,
-            ]);
+                $product_price = !empty( $_POST[$price_id] ) ? get_price_without_fomatter( $_POST[$price_id] ) : 0;
+                $product_qty = !empty( $_POST[$quantity_id] ) ? $_POST[$quantity_id] : 1;
 
-            $line_items = [];
-            if( !empty( $product_price ) ) {
-
-                $item_unit_amount = get_price_without_fomatter($product_price);
-                $total_item_amount = $item_unit_amount * $product_qty;
-                $line_items[] = [
-                    'name' => 'Product',
-                    'kind' => Braintree\TransactionLineItem::DEBIT,
+                $products[] = [
+                    'label' => $label,
+                    'price' => $product_price,
                     'quantity' => $product_qty,
+                ];
+            }
+        }
+
+        $cart_prices = get_gfb_prices([
+            'form_id' => $form_id,
+            'products' => $products,
+            'card_type' => $card_type,
+        ]);
+
+        $line_items = [];
+        if( !empty( $cart_prices['products'] ) && is_array( $cart_prices['products'] ) ) {
+
+            foreach ( $cart_prices['products'] as $cart_product ) {
+
+                $label = !empty( $cart_product['label'] ) ? $cart_product['label'] : esc_html__( 'Product', 'angelleye-gravity-forms-braintree' );
+                $product_price = !empty( $cart_product['price'] ) ? $cart_product['price'] : '';
+                $product_quantity = !empty( $cart_product['quantity'] ) ? $cart_product['quantity'] : '';
+                $item_unit_amount = get_price_without_fomatter($product_price);
+                $total_item_amount = $item_unit_amount * $product_quantity;
+
+                $line_items[] = [
+                    'name' => $label,
+                    'kind' => Braintree\TransactionLineItem::DEBIT,
+                    'quantity' => $product_quantity,
                     'unitAmount' => $item_unit_amount,
                     'totalAmount' => $total_item_amount,
                 ];
             }
+        }
+
+        if( !empty( $extra_fees['is_fees_enable'] ) ) {
 
             if( !empty( $cart_prices['convenience_fee'] ) ) {
 
                 $convenience_fee_amount = get_price_without_fomatter($cart_prices['convenience_fee']);
                 $line_items[] = [
-                    'name' => 'Convenience Fee',
+                    'name' => !empty( $extra_fees_label ) ? $extra_fees_label : esc_html__('Convenience Fee', 'angelleye-gravity-forms-braintree'),
                     'kind' => Braintree\TransactionLineItem::DEBIT,
                     'quantity' => 1,
                     'unitAmount' => $convenience_fee_amount,
                     'totalAmount' => $convenience_fee_amount,
                 ];
             }
+        }
 
-            if( !empty( $line_items ) && is_array( $line_items ) ) {
-                $args['lineItems'] = $line_items;
-                $total = !empty( $cart_prices['total'] ) ? get_price_without_fomatter( $cart_prices['total'] ) : '';
-                if( !empty( $total ) ) {
-                    $args['amount'] = $total;
-                }
+        if( !empty( $line_items ) && is_array( $line_items ) ) {
+
+            $args['lineItems'] = $line_items;
+
+            $total = !empty( $cart_prices['total'] ) ? get_price_without_fomatter( $cart_prices['total'] ) : '';
+            if( !empty( $total ) ) {
+                $args['amount'] = $total;
             }
         }
 
@@ -237,6 +264,10 @@ class AngelleyeGravityBraintreeFieldMapping
 
     public function manage_transaction_response(  $entry, $form ) {
 
+        if( ! function_exists('angelleye_get_extra_fees') ) {
+            require_once GRAVITY_FORMS_BRAINTREE_DIR_PATH.'includes/angelleye-functions.php';
+        }
+
         $form_id = absint( rgar( $form, 'id' ) );
         $entry_id   = absint( rgar( $entry, 'id' ) );
         $extra_fees = angelleye_get_extra_fees( $form_id );
@@ -244,32 +275,47 @@ class AngelleyeGravityBraintreeFieldMapping
         $transaction_response = [];
         if( !empty( $extra_fees['is_fees_enable'] ) ) {
 
-            $product_fields = get_product_fields_by_form_id( $form_id );
-            $product_group = !empty( $product_fields['group'] ) ? $product_fields['group'] : '';
-            $price_id = !empty( $product_fields['price_id'] ) ? $product_fields['price_id'] : '';
-            $quantity_id = !empty( $product_fields['quantity_id'] ) ? $product_fields['quantity_id'] : '';
-
-            if( !empty( $product_group ) && $product_group === 'multiple' ) {
-                $price_id = !empty( $product_fields['price_id'] ) ? str_replace('.', '_', $product_fields['price_id'] ) : '';
-                $quantity_id = !empty( $product_fields['quantity_id'] ) ? str_replace('.', '_', $product_fields['quantity_id'] ) : '';
-            }
-
-            $product_price = !empty( $_POST[$price_id] ) ? get_price_without_fomatter( $_POST[$price_id] ) : 0;
-            $product_qty = !empty( $_POST[$quantity_id] ) ? $_POST[$quantity_id] : 1;
-
             $card_type = !empty( $_POST['payment_card_type'] ) ? $_POST['payment_card_type'] : '';
             if( !empty( $_POST['ach_token'] ) ) {
                 $card_type = !empty( $_POST['ach_card_type'] ) ? $_POST['ach_card_type'] : '';
             }
 
+            $product_fields = get_product_fields_by_form_id( $form_id );
+            $products = [];
+
+            if( !empty( $product_fields ) && is_array( $product_fields ) ) {
+
+                foreach ($product_fields as $product_field) {
+
+                    $label = !empty( $product_field['label'] ) ? $product_field['label'] : '';
+                    $product_group = !empty( $product_field['group'] ) ? $product_field['group'] : '';
+                    $price_id = !empty( $product_field['price_id'] ) ? $product_field['price_id'] : '';
+                    $quantity_id = !empty( $product_field['quantity_id'] ) ? $product_field['quantity_id'] : '';
+
+                    if( !empty( $product_group ) && $product_group === 'multiple' ) {
+                        $price_id = !empty( $product_field['price_id'] ) ? get_product_field_filter( $product_field['price_id'] ) : '';
+                        $quantity_id = !empty( $product_field['quantity_id'] ) ? get_product_field_filter( $product_field['quantity_id'] ) : '';
+                    }
+
+                    $product_price = !empty( $_POST[$price_id] ) ? get_price_without_fomatter( $_POST[$price_id] ) : 0;
+                    $product_qty = !empty( $_POST[$quantity_id] ) ? $_POST[$quantity_id] : 1;
+
+                    $products[] = [
+                        'label' => $label,
+                        'price' => $product_price,
+                        'quantity' => $product_qty,
+                    ];
+                }
+            }
+
             $transaction_response = get_gfb_prices([
                 'form_id' => $form_id,
-                'product_price' => $product_price,
-                'product_qty' => $product_qty,
+                'products' => $products,
                 'card_type' => $card_type,
             ]);
 
             $transaction_response['is_fees_enable'] = $extra_fees['is_fees_enable'];
+            $transaction_response['fees_label'] = !empty( $extra_fees['title'] ) ? $extra_fees['title'] : '';
         }
 
         gform_update_meta( $entry_id, 'gform_transaction_response', $transaction_response );
@@ -285,6 +331,8 @@ class AngelleyeGravityBraintreeFieldMapping
         if( !empty( $response ) ) {
 
             if( !empty( $response['is_fees_enable'] ) ) {
+
+                $fees_label = !empty( $response['fees_label'] ) ? $response['fees_label'] : esc_html__('Convenience Fee','angelleye-gravity-forms-braintree');
 
                 GF_Order_Factory::load_dependencies();
                 $order         = GF_Order_Factory::create_from_entry( $form, $lead, false, true, true);
@@ -307,7 +355,7 @@ class AngelleyeGravityBraintreeFieldMapping
 
                 $order_summary['rows']['footer'] = [
                     [
-                        'name' => esc_html__('Convenience Fee ('.$extra_fee_amount.'%)','angelleye-gravity-forms-braintree'),
+                        'name' => esc_html__("{$fees_label} ({$extra_fee_amount}%)",'angelleye-gravity-forms-braintree'),
                         'price_money' => $convenience_fee,
                         'sub_total_money' => $convenience_fee,
                     ]

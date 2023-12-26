@@ -250,8 +250,16 @@ function manageACHPaymentActions(form_id) {
     if( undefined !== paymentProcess && null !== paymentProcess ) {
         paymentProcess.addEventListener('click', function () {
             manageACHGfromFields(form_id);
+            manageACHScrollIntoView('gform_preview_'+form_id);
             document.getElementById('gform_'+form_id).submit();
         });
+    }
+}
+
+function manageACHScrollIntoView(sectionID) {
+    var scrollSection = document.getElementById(sectionID);
+    if (scrollSection) {
+        scrollSection.scrollIntoView({ behavior: 'smooth' });
     }
 }
 
@@ -288,27 +296,21 @@ function manageACHGfromFields( form_id, is_preview = false ) {
     let gformFooter = form.querySelectorAll('.gform_footer');
     if( undefined !== gformFooter  &&  null !== gformFooter ) {
         gformFooter.forEach(function(footer) {
-            if( is_preview ) {
-                footer.style.display = 'none';
-            } else {
-                footer.style.display = 'block';
-            }
+            footer.style.display = 'none';
         });
     }
 
     let gformPreview = document.getElementById('gform_preview_'+form_id);
     if( undefined !== gformPreview && null !== gformPreview ) {
-        if( is_preview ) {
-            gformPreview.style.display = 'block';
-        } else {
-            gformPreview.style.display = 'none';
-        }
+        gformPreview.style.display = 'block';
     }
 
     let gformSpinner = document.getElementById('gform_ajax_spinner_'+form_id);
     if (undefined !== gformSpinner && null !== gformSpinner) {
         gformSpinner.remove();
     }
+
+    manageACHScrollIntoView('gform_preview_'+form_id);
 }
 
 function stateNameToAbbreviation(name) {

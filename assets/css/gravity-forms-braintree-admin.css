@@ -86,3 +86,8 @@
 #gform_braintree_mapping table{
     width: 800px;
 }
+
+.gform_settings_form .gform-settings-panel .extra-fees-input,
+.gform_settings_form .gform-settings-field .extra-fees-input {
+    width: 100%;
+}
