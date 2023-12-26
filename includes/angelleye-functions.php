@@ -275,7 +275,23 @@ function get_price_without_fomatter( $price ) {
         return 0;
     }
 
+    if( str_contains($price, '|' ) ) {
+        $temp_price = explode('|', $price);
+        $price = !empty( $temp_price[1] ) ? $temp_price[1] : 0;
+    }
+
     return preg_replace('/[^0-9.,]/', '', $price );
+}
+
+function get_selected_product_label( $value, $default_value = '' ){
+
+    $product_label = '';
+    if( str_contains( $value, '|' ) ) {
+        $temp_price = explode('|', $value);
+        $product_label = !empty( $temp_price[0] ) ? $temp_price[0] : '';
+    }
+
+    return !empty( $product_label  ) ? $product_label : $default_value;
 }
 
 function get_product_field_filter( $product_field ) {

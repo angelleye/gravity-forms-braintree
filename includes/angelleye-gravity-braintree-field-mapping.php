@@ -199,6 +199,8 @@ class AngelleyeGravityBraintreeFieldMapping
                 $product_price = !empty( $_POST[$price_id] ) ? get_price_without_fomatter( $_POST[$price_id] ) : 0;
                 $product_qty = !empty( $_POST[$quantity_id] ) ? $_POST[$quantity_id] : 1;
 
+                $label = !empty( $product_price ) ? get_selected_product_label( $product_price, $label ) : '';
+
                 $products[] = [
                     'label' => $label,
                     'price' => $product_price,
@@ -299,6 +301,8 @@ class AngelleyeGravityBraintreeFieldMapping
 
                     $product_price = !empty( $_POST[$price_id] ) ? get_price_without_fomatter( $_POST[$price_id] ) : 0;
                     $product_qty = !empty( $_POST[$quantity_id] ) ? $_POST[$quantity_id] : 1;
+
+                    $label = !empty( $product_price ) ? get_selected_product_label( $product_price, $label ) : '';
 
                     $products[] = [
                         'label' => $label,

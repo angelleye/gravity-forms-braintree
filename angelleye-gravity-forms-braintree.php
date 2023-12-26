@@ -190,11 +190,12 @@ class AngelleyeGravityFormsBraintree{
                     $quantity_id = !empty( $product_field['quantity_id'] ) ? $product_field['quantity_id'] : '';
 
                     $product_price = 0;
-                    $product_qty = 0;
+                    $product_qty = 1;
                     if( !empty( $form_data ) && is_array( $form_data ) ) {
                         foreach ( $form_data as $data ) {
                             if( !empty( $data['name'] ) && $data['name'] == $price_id ) {
                                 $product_price = !empty( $data['value'] ) ? get_price_without_fomatter( $data['value'] ) : '';
+                                $label = !empty( $data['value'] ) ? get_selected_product_label( $data['value'], $label ) : '';
                             } elseif ( !empty( $data['name'] ) && $data['name'] == $quantity_id ) {
                                 $product_qty = !empty( $data['value'] ) ? $data['value'] : 1;
                             }
