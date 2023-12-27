@@ -159,27 +159,31 @@ function angelleye_get_extra_fees( $form_id ) {
 
 function get_product_fields_by_form_id(  $form_id ) {
 
-    $product_fields = [];
-
     $form = GFAPI::get_form($form_id);
     $fields  = GFAPI::get_fields_by_type( $form, array( 'product' ) );
 
-    foreach ( $fields as $field ) {
+    $product_fields = [];
+    if( !empty( $fields ) && is_array( $fields ) ) {
+
+        foreach ( $fields as $field ) {
 
             $temp_field = [];
             $field_id = !empty( $field->id ) ? $field->id : '';
-            $input_type = !empty( $field['inputType'] ) ? $field['inputType'] :  '';
+            $input_type = !empty( $field->inputType ) ? $field->inputType :  '';
+            $temp_field['id'] = $field_id;
             $temp_field['type'] = $input_type;
             $temp_field['label'] = !empty( $field->label ) ? $field->label : esc_html__('Product', 'angelleye-gravity-forms-braintree');
             switch ( $input_type ) {
                 case 'singleproduct' :
                 case 'hiddenproduct' :
                 case 'calculation' :
-                $temp_field['group'] = 'multiple';
-                $temp_field['base_price'] = !empty( $field['basePrice'] ) ? get_price_without_fomatter( $field['basePrice'] ) :  '';
-                    $inputs = !empty( $field['inputs'] ) ? $field['inputs'] : '';
+                    $temp_field['group'] = 'multiple';
+                    $temp_field['base_price'] = !empty( $field->basePrice ) ? get_price_without_fomatter( $field->basePrice ) :  '';
+                    $inputs = !empty( $field->inputs ) ? $field->inputs : '';
                     if( !empty( $inputs ) && is_array( $inputs  )  ) {
+
                         foreach ( $inputs as $input ) {
+
                             if( !empty( $input['label'] ) && 'Price' === $input['label']) {
                                 $temp_field['price_id'] =  !empty( $input['id'] )  ? 'input_'.$input['id'] : '';
                             } elseif ( !empty( $input['label'] ) && 'Quantity' === $input['label'] ) {
@@ -197,9 +201,48 @@ function get_product_fields_by_form_id(  $form_id ) {
             }
 
             $product_fields[] = $temp_field;
+        }
     }
 
-    return $product_fields;
+    $total_fields  = GFAPI::get_fields_by_type( $form, array( 'total' ) );
+    $total = [];
+    if( !empty( $total_fields ) && is_array( $total_fields )  ) {
+        $total_field = !empty( $total_fields[0] ) ? $total_fields[0] : [];
+        $total['type'] = !empty( $total_field->type ) ? $total_field->type : '';
+        $total['label'] = !empty( $total_field->label ) ? $total_field->label : '';
+        $total['id'] = !empty( $total_field->id ) ? $total_field->id : '';
+        $total['input_id'] = !empty( $total_field->id ) ? "input_{$total_field->id}" : '';
+    }
+
+    $gform_braintree = new Plugify_GForm_Braintree();
+    $payment_feed = $gform_braintree->get_payment_feed([], $form);
+    $feed_meta = !empty( $payment_feed['meta'] ) ? $payment_feed['meta'] : '';
+    $transaction_type = !empty( $feed_meta['transactionType'] ) ? $feed_meta['transactionType'] : '';
+    $payment_amount = !empty( $feed_meta['paymentAmount'] ) ? $feed_meta['paymentAmount'] : '';
+
+    if( !empty( $transaction_type ) && $transaction_type === 'subscription' ) {
+        $payment_amount = !empty( $feed_meta['recurringAmount'] ) ? $feed_meta['recurringAmount'] : '';
+    }
+
+    if( !empty( $payment_amount ) && $payment_amount !== 'form_total' &&  !empty( $product_fields ) && is_array( $product_fields ) ) {
+
+        $feed_products = [];
+
+        foreach ( $product_fields as $product_field ) {
+
+            if( !empty( $product_field['id'] ) && $product_field['id'] == $payment_amount ) {
+                $feed_products[] = $product_field;
+                break;
+            }
+        }
+
+        $product_fields = $feed_products;
+    }
+
+    return [
+        'products' => $product_fields,
+        'total' => $total,
+    ];
 }
 
 function get_gfb_format_price( $price = 0, $symbol = true ) {

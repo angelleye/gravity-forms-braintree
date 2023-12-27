@@ -182,10 +182,10 @@ class AngelleyeGravityBraintreeFieldMapping
 
         $product_fields = get_product_fields_by_form_id( $form_id );
         $products = [];
-        if( !empty( $product_fields ) && is_array( $product_fields ) ) {
+        if( !empty( $product_fields['products'] ) && is_array( $product_fields['products'] ) ) {
 
-            foreach ( $product_fields as $product_field ) {
-
+            foreach ( $product_fields['products'] as $product_field ) {
+                $id = !empty( $product_field['id'] ) ? $product_field['id'] : '';
                 $label = !empty($product_field['label']) ? $product_field['label'] : '';
                 $product_group = !empty($product_field['group']) ? $product_field['group'] : '';
                 $price_id = !empty($product_field['price_id']) ? $product_field['price_id'] : '';
@@ -202,6 +202,7 @@ class AngelleyeGravityBraintreeFieldMapping
                 $label = !empty( $product_price ) ? get_selected_product_label( $product_price, $label ) : '';
 
                 $products[] = [
+                    'id'    => $id,
                     'label' => $label,
                     'price' => $product_price,
                     'quantity' => $product_qty,
@@ -285,10 +286,10 @@ class AngelleyeGravityBraintreeFieldMapping
             $product_fields = get_product_fields_by_form_id( $form_id );
             $products = [];
 
-            if( !empty( $product_fields ) && is_array( $product_fields ) ) {
+            if( !empty( $product_fields['products'] ) && is_array( $product_fields['products'] ) ) {
 
-                foreach ($product_fields as $product_field) {
-
+                foreach ($product_fields['products'] as $product_field) {
+                    $id = !empty( $product_field['id'] ) ? $product_field['id'] : '';
                     $label = !empty( $product_field['label'] ) ? $product_field['label'] : '';
                     $product_group = !empty( $product_field['group'] ) ? $product_field['group'] : '';
                     $price_id = !empty( $product_field['price_id'] ) ? $product_field['price_id'] : '';
@@ -305,6 +306,7 @@ class AngelleyeGravityBraintreeFieldMapping
                     $label = !empty( $product_price ) ? get_selected_product_label( $product_price, $label ) : '';
 
                     $products[] = [
+                        'id'    => $id,
                         'label' => $label,
                         'price' => $product_price,
                         'quantity' => $product_qty,

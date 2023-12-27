@@ -99,10 +99,11 @@ if ( ! class_exists( 'Angelleye_Gravity_Braintree_CreditCard_Field' ) ) {
                 'card_type' => $this->type,
             ];
 
-            ?>
+            $dropin_container_id = uniqid("{$form_id}_");
+			?>
             <div class='ginput_container gform_payment_method_options ginput_container_<?php echo $this->type; ?>'
                  id='<?php echo $field_id; ?>'>
-                <div id="dropin-container"></div>
+                <div id="dropin-container_<?php echo $dropin_container_id; ?>"></div>
                 <input type="hidden" id="nonce" name="payment_method_nonce"/>
                 <input type="hidden" id="payment_card_type" name="payment_card_type"/>
                 <input type="hidden" id="payment_card_details" name="input_<?php echo $input_field_id; ?>"/>
@@ -229,15 +230,15 @@ if ( ! class_exists( 'Angelleye_Gravity_Braintree_CreditCard_Field' ) ) {
                 }
 
                 if(typeof braintree === 'undefined') {
-                    // console.log("Braintree is not loaded yet. Loading...");
-                    var script = document.createElement('script');
-                    script.onload = function () {
-                        // console.log("Braintree is now loaded.");
-                        braintree.dropin.create({
-                            authorization: '<?php echo $clientToken;?>',
-                            container: '#dropin-container'
-                        }, (error, dropinInstance) => {
-                            if (error) console.error(error);
+			        // console.log("Braintree is not loaded yet. Loading...");
+			        var script = document.createElement('script');
+			        script.onload = function () {
+			            // console.log("Braintree is now loaded.");
+			            braintree.dropin.create({
+			                authorization: '<?php echo $clientToken;?>',
+			                container: '#dropin-container_<?php echo $dropin_container_id; ?>'
+			            }, (error, dropinInstance) => {
+			                if (error) console.error(error);
 
                             document.getElementById('gform_<?php echo $form_id; ?>').addEventListener('submit', event => {
                                 event.preventDefault();
@@ -255,18 +256,18 @@ if ( ! class_exists( 'Angelleye_Gravity_Braintree_CreditCard_Field' ) ) {
                                     } else {
                                         document.getElementById('gform_<?php echo $form_id; ?>').submit();
                                     }
-                                });
-                            });
-                        });
-                    };
-                    script.src = 'https://js.braintreegateway.com/web/dropin/1.26.0/js/dropin.min.js';
-                    document.head.appendChild(script);
-                } else {
-                    braintree.dropin.create({
-                        authorization: '<?php echo $clientToken;?>',
-                        container: '#dropin-container'
-                    }, (error, dropinInstance) => {
-                        if (error) console.error(error);
+			                    });
+			                });
+			            });
+			        };
+			        script.src = 'https://js.braintreegateway.com/web/dropin/1.26.0/js/dropin.min.js';
+			        document.head.appendChild(script);
+			    } else {
+			    	braintree.dropin.create({
+	                    authorization: '<?php echo $clientToken;?>',
+	                    container: '#dropin-container_<?php echo $dropin_container_id; ?>'
+	                }, (error, dropinInstance) => {
+	                    if (error) console.error(error);
 
                         document.getElementById('gform_<?php echo $form_id; ?>').addEventListener('submit', event => {
                             event.preventDefault();
@@ -276,6 +277,7 @@ if ( ! class_exists( 'Angelleye_Gravity_Braintree_CreditCard_Field' ) ) {
                                 document.getElementById('nonce').value = payload.nonce;
                                 document.getElementById('payment_card_type').value = payload.type;
 
+                                console.log(payload);
                                 let cardType = payload.details.cardType;
                                 let cardLastFour = payload.details.lastFour;
                                 document.getElementById('payment_card_details').value = cardLastFour+" ("+cardType+")";
