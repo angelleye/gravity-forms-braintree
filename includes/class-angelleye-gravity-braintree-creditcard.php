@@ -282,8 +282,7 @@ if ( ! class_exists( 'Angelleye_Gravity_Braintree_CreditCard_Field' ) ) {
                                 if (error) console.error(error);
                                 document.getElementById('nonce').value = payload.nonce;
                                 document.getElementById('payment_card_type').value = payload.type;
-
-                                console.log(payload);
+                                
                                 let cardType = payload.details.cardType;
                                 let cardLastFour = payload.details.lastFour;
                                 document.getElementById('payment_card_details').value = cardLastFour+" ("+cardType+")";
