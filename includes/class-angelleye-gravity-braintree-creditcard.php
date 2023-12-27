@@ -94,7 +94,7 @@ if ( ! class_exists( 'Angelleye_Gravity_Braintree_CreditCard_Field' ) ) {
 
             $gfb_obj = [
                 'ajax_url' => admin_url( 'admin-ajax.php' ),
-                'form_id' => $form_id,
+                'form_id' => (int)$form_id,
                 'is_fees_enable' => !empty( $extra_fees['is_fees_enable'] ) ? $extra_fees['is_fees_enable'] : false,
                 'card_type' => $this->type,
                 'is_admin' => is_admin(),
@@ -105,17 +105,21 @@ if ( ! class_exists( 'Angelleye_Gravity_Braintree_CreditCard_Field' ) ) {
             <div class='ginput_container gform_payment_method_options ginput_container_<?php echo $this->type; ?>'
                  id='<?php echo $field_id; ?>'>
                 <div id="dropin-container_<?php echo $dropin_container_id; ?>"></div>
-                <input type="hidden" id="nonce" name="payment_method_nonce"/>
-                <input type="hidden" id="payment_card_type" name="payment_card_type"/>
-                <input type="hidden" id="payment_card_details" name="input_<?php echo $input_field_id; ?>"/>
+                <input type="hidden" id="nonce_<?php echo $form_id; ?>" name="payment_method_nonce"/>
+                <input type="hidden" id="payment_card_type_<?php echo $form_id; ?>" name="payment_card_type"/>
+                <input type="hidden" id="payment_card_details_<?php echo $form_id; ?>" name="input_<?php echo $input_field_id; ?>"/>
             </div>
             <script type="text/javascript">
-                var gfbObj = <?php echo json_encode($gfb_obj); ?>;
+                if( undefined === gfbObj ) {
+                    var gfbObj = {};
+                }
 
-                function manageGfromFields( is_preview = false ) {
+                gfbObj['<?php echo $form_id; ?>'] = <?php echo json_encode($gfb_obj); ?>;
 
-                    const form = document.getElementById('gform_<?php echo $form_id; ?>');
-                    let cardTypeEl = form.querySelectorAll('.gfield--type-'+gfbObj.card_type);
+                function manageGfromFields( form_id, is_preview = false ) {
+
+                    const form = document.getElementById('gform_'+form_id);
+                    let cardTypeEl = form.querySelectorAll('.gfield--type-'+gfbObj[form_id].card_type);
                     if( undefined !== cardTypeEl  &&  null !== cardTypeEl ) {
                         cardTypeEl.forEach(function(element) {
                             if( is_preview ) {
@@ -126,7 +130,7 @@ if ( ! class_exists( 'Angelleye_Gravity_Braintree_CreditCard_Field' ) ) {
                         });
                     }
 
-                    let gformFields = document.getElementById('gform_fields_<?php echo $form_id; ?>');
+                    let gformFields = document.getElementById('gform_fields_'+form_id);
                     if( undefined !== gformFields && null !== gformFields ) {
                         gformFields.classList.add('fields-preview');
                         var inputElements = gformFields.querySelectorAll('input, input[type="text"], input[type="number"], input[type="radio"], input[type="checkbox"], select, textarea');
@@ -148,45 +152,45 @@ if ( ! class_exists( 'Angelleye_Gravity_Braintree_CreditCard_Field' ) ) {
                         });
                     }
 
-                    let gformPreview = document.getElementById('gform_preview_<?php echo $form_id; ?>');
+                    let gformPreview = document.getElementById('gform_preview_'+form_id);
                     if( undefined !== gformPreview && null !== gformPreview ) {
                         gformPreview.style.display = 'block';
                     }
 
-                    let gformSpinner = document.getElementById('gform_ajax_spinner_<?php echo $form_id; ?>');
+                    let gformSpinner = document.getElementById('gform_ajax_spinner_'+form_id);
                     if (undefined !== gformSpinner && null !== gformSpinner) {
                         gformSpinner.remove();
                     }
 
-                    manageScrollIntoView('gform_preview_<?php echo $form_id; ?>');
+                    manageScrollIntoView('gform_preview_'+form_id);
                 }
 
-                function managePreviewBeforePayment( payload ) {
+                function managePreviewBeforePayment( payload, form_id ) {
 
-                    displayPaymentPreview(payload);
-                    manageGfromFields(true);
+                    displayPaymentPreview(payload, form_id);
+                    manageGfromFields(form_id, true);
                 }
 
-                function displayPaymentPreview( payload ) {
+                function displayPaymentPreview( payload, form_id ) {
 
                     if( undefined !== payload.type && null !== payload.type  ) {
 
                         jQuery.ajax({
                             type: 'POST',
                             dataType: 'json',
-                            url: gfbObj.ajax_url,
+                            url: gfbObj[form_id].ajax_url,
                             data: {
                                 action: 'gform_payment_preview_html',
                                 nonce: '<?php echo wp_create_nonce('preview-payment-nonce'); ?>',
                                 card_type: payload.type,
-                                form_id: <?php echo $form_id; ?>,
-                                form_data: jQuery('#gform_<?php echo $form_id; ?>').serializeArray()
+                                form_id: form_id,
+                                form_data: jQuery('#gform_'+form_id).serializeArray()
                             },
                             success: function ( result ) {
                                 if(result.status) {
-                                    let gFormPreview = document.getElementById('gform_preview_<?php echo $form_id; ?>');
+                                    let gFormPreview = document.getElementById('gform_preview_'+form_id);
                                     gFormPreview.innerHTML = result.html;
-                                    managePaymentActions();
+                                    managePaymentActions(form_id);
                                 } else {
                                     location.reload();
                                 }
@@ -202,37 +206,37 @@ if ( ! class_exists( 'Angelleye_Gravity_Braintree_CreditCard_Field' ) ) {
                     }
                 }
 
-                function managePaymentActions() {
+                function managePaymentActions(form_id) {
 
-                    manageScrollIntoView('gform_preview_<?php echo $form_id; ?>');
+                    manageScrollIntoView('gform_preview_'+form_id);
 
-                    let paymentCancel = document.getElementById('gform_payment_cancel_<?php echo $form_id; ?>');
+                    let paymentCancel = document.getElementById('gform_payment_cancel_'+form_id);
                     if( undefined !== paymentCancel && null !== paymentCancel ) {
                         paymentCancel.addEventListener('click', function () {
                             location.reload();
                         });
                     }
 
-                    let paymentProcess = document.getElementById('gform_payment_pay_<?php echo $form_id; ?>');
+                    let paymentProcess = document.getElementById('gform_payment_pay_'+form_id);
                     if( undefined !== paymentProcess && null !== paymentProcess ) {
                         paymentProcess.addEventListener('click', function () {
-                            manageGfromFields();
-                            document.getElementById('gform_<?php echo $form_id; ?>').submit();
+                            manageGfromFields(form_id);
+                            document.getElementById('gform_'+form_id).submit();
                         });
                     }
                 }
 
-                if( gfbObj.is_fees_enable ) {
+                if( gfbObj['<?php echo $form_id; ?>'].is_fees_enable ) {
 
                     let gform_fields_id = 'gform_fields_<?php echo $form_id; ?>'
-                    if(gfbObj.is_admin) {
+                    if(gfbObj['<?php echo $form_id; ?>'].is_admin) {
                         gform_fields_id = 'gform_fields';
                     }
                     let gFormFields = document.getElementById(gform_fields_id);
-                    let previewHtmlField = document.createElement("div");
-                    previewHtmlField.id = 'gform_preview_<?php echo $form_id; ?>';
-                    previewHtmlField.classList.add('gform-preview');
-                    gFormFields.appendChild(previewHtmlField);
+                    let previewHtmlField = document.getElementById('gform_preview_<?php echo $form_id; ?>');
+                    if( undefined === previewHtmlField || null === previewHtmlField ) {
+                        gFormFields.insertAdjacentHTML('afterend', '<div id="gform_preview_<?php echo $form_id; ?>" class="gform-preview"></div>');
+                    }
                 }
 
                 if(typeof braintree === 'undefined') {
@@ -249,16 +253,15 @@ if ( ! class_exists( 'Angelleye_Gravity_Braintree_CreditCard_Field' ) ) {
                             document.getElementById('gform_<?php echo $form_id; ?>').addEventListener('submit', event => {
                                 event.preventDefault();
 
-                                dropinInstance.requestPaymentMethod((error, payload) => {
-                                    if (error) console.error(error);
-                                    document.getElementById('nonce').value = payload.nonce;
-                                    document.getElementById('payment_card_type').value = payload.type;
-
+			                    dropinInstance.requestPaymentMethod((error, payload) => {
+			                        if (error) console.error(error);
+			                        document.getElementById('nonce_<?php echo $form_id; ?>').value = payload.nonce;
+			                        document.getElementById('payment_card_type_<?php echo $form_id; ?>').value = payload.type;
                                     let cardType = payload.details.cardType;
                                     let cardLastFour = payload.details.lastFour;
-                                    document.getElementById('payment_card_details').value = cardLastFour+" ("+cardType+")";
-                                    if( gfbObj.is_fees_enable ) {
-                                        managePreviewBeforePayment(payload);
+                                    document.getElementById('payment_card_details_<?php echo $form_id; ?>').value = cardLastFour+" ("+cardType+")";
+                                    if( gfbObj['<?php echo $form_id; ?>'].is_fees_enable ) {
+                                        managePreviewBeforePayment(payload, <?php echo $form_id; ?>);
                                     } else {
                                         document.getElementById('gform_<?php echo $form_id; ?>').submit();
                                     }
@@ -278,16 +281,15 @@ if ( ! class_exists( 'Angelleye_Gravity_Braintree_CreditCard_Field' ) ) {
                         document.getElementById('gform_<?php echo $form_id; ?>').addEventListener('submit', event => {
                             event.preventDefault();
 
-                            dropinInstance.requestPaymentMethod((error, payload) => {
-                                if (error) console.error(error);
-                                document.getElementById('nonce').value = payload.nonce;
-                                document.getElementById('payment_card_type').value = payload.type;
-                                
+	                        dropinInstance.requestPaymentMethod((error, payload) => {
+	                            if (error) console.error(error);
+	                            document.getElementById('nonce_<?php echo $form_id; ?>').value = payload.nonce;
+                                document.getElementById('payment_card_type_<?php echo $form_id; ?>').value = payload.type;
                                 let cardType = payload.details.cardType;
                                 let cardLastFour = payload.details.lastFour;
-                                document.getElementById('payment_card_details').value = cardLastFour+" ("+cardType+")";
-                                if( gfbObj.is_fees_enable ) {
-                                    managePreviewBeforePayment(payload);
+                                document.getElementById('payment_card_details_<?php echo $form_id; ?>').value = cardLastFour+" ("+cardType+")";
+                                if( gfbObj['<?php echo $form_id; ?>'].is_fees_enable ) {
+                                    managePreviewBeforePayment(payload, <?php echo $form_id; ?>);
                                 } else {
                                     document.getElementById('gform_<?php echo $form_id; ?>').submit();
                                 }

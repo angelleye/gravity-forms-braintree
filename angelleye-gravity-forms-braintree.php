@@ -272,8 +272,8 @@ class AngelleyeGravityFormsBraintree{
                     </tfoot>
                 </table>
                 <div class="summary-actions">
-                    <button type="button" name="gform_payment_cancel_<?php echo $form_id; ?>" id="gform_payment_cancel_<?php echo $form_id; ?>"><?php esc_html_e('Cancel', 'angelleye-gravity-forms-braintree'); ?></button>
-                    <button type="button" name="gform_payment_pay_<?php echo $form_id; ?>" id="gform_payment_pay_<?php echo $form_id; ?>"><?php esc_html_e('Pay Now', 'angelleye-gravity-forms-braintree'); ?></button>
+                    <button type="button" class="gform_button button" name="gform_payment_cancel_<?php echo $form_id; ?>" id="gform_payment_cancel_<?php echo $form_id; ?>"><?php esc_html_e('Cancel', 'angelleye-gravity-forms-braintree'); ?></button>
+                    <button type="button" class="gform_button button" name="gform_payment_pay_<?php echo $form_id; ?>" id="gform_payment_pay_<?php echo $form_id; ?>"><?php esc_html_e('Pay Now', 'angelleye-gravity-forms-braintree'); ?></button>
                 </div>
             </div>
             <?php
