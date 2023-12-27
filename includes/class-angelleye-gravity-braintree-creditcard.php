@@ -97,6 +97,7 @@ if ( ! class_exists( 'Angelleye_Gravity_Braintree_CreditCard_Field' ) ) {
                 'form_id' => $form_id,
                 'is_fees_enable' => !empty( $extra_fees['is_fees_enable'] ) ? $extra_fees['is_fees_enable'] : false,
                 'card_type' => $this->type,
+                'is_admin' => is_admin(),
             ];
 
             $dropin_container_id = uniqid("{$form_id}_");
@@ -222,7 +223,12 @@ if ( ! class_exists( 'Angelleye_Gravity_Braintree_CreditCard_Field' ) ) {
                 }
 
                 if( gfbObj.is_fees_enable ) {
-                    let gFormFields = document.getElementById('gform_fields_<?php echo $form_id; ?>');
+
+                    let gform_fields_id = 'gform_fields_<?php echo $form_id; ?>'
+                    if(gfbObj.is_admin) {
+                        gform_fields_id = 'gform_fields';
+                    }
+                    let gFormFields = document.getElementById(gform_fields_id);
                     let previewHtmlField = document.createElement("div");
                     previewHtmlField.id = 'gform_preview_<?php echo $form_id; ?>';
                     previewHtmlField.classList.add('gform-preview');
