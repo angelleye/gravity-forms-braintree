@@ -203,7 +203,7 @@ class AngelleyeGravityBraintreeFieldMapping
                 $product_price = !empty( $_POST[$price_id] ) ? get_price_without_formatter( $_POST[$price_id] ) : 0;
                 $product_qty = !empty( $_POST[$quantity_id] ) ? $_POST[$quantity_id] : 1;
 
-                $label = !empty( $product_price ) ? get_selected_product_label( $product_price, $label ) : '';
+                $label = !empty( $_POST[$price_id] ) ? get_selected_product_label( $_POST[$price_id], $label ) : '';
 
                 $products[] = [
                     'id'    => $id,
@@ -349,6 +349,15 @@ class AngelleyeGravityBraintreeFieldMapping
         $form_id   = absint( rgar( $form, 'id' ) );
         $entry_id   = absint( rgar( $lead, 'id' ) );
 
+        GF_Order_Factory::load_dependencies();
+        $order         = GF_Order_Factory::create_from_entry( $form, $lead, false, true, true);
+        $order_summary = ( new GF_Entry_Details_Order_Exporter( $order ) )->export();
+        if ( empty( $order_summary['rows'] ) ) {
+            return '';
+        }
+
+        $order_summary['labels'] = GF_Order_Summary::get_labels( $form );
+
         $response = gform_get_meta($entry_id, 'gform_transaction_response');
 
         if( !empty( $response ) ) {
@@ -356,15 +365,6 @@ class AngelleyeGravityBraintreeFieldMapping
             if( !empty( $response['is_fees_enable'] ) ) {
 
                 $fees_label = !empty( $response['fees_label'] ) ? $response['fees_label'] : esc_html__('Convenience Fee','angelleye-gravity-forms-braintree');
-
-                GF_Order_Factory::load_dependencies();
-                $order         = GF_Order_Factory::create_from_entry( $form, $lead, false, true, true);
-                $order_summary = ( new GF_Entry_Details_Order_Exporter( $order ) )->export();
-                if ( empty( $order_summary['rows'] ) ) {
-                    return '';
-                }
-
-                $order_summary['labels'] = GF_Order_Summary::get_labels( $form );
 
                 $sub_total = !empty( $response['subtotal'] ) ? $response['subtotal'] : 0;
                 $total = !empty( $response['total'] ) ? $response['total'] : 0;
@@ -384,18 +384,18 @@ class AngelleyeGravityBraintreeFieldMapping
                     ]
                 ];
 
-                $template = 'view-pricing-fields-html.php';
-                if( !empty( $_GET['page'] ) && $_GET['page'] === 'gf_entries' && !empty( $_GET['view'] ) && $_GET['view'] === 'entry' ) {
-                    $template = 'view-order-summary.php';
-                }
-
-                ob_start();
-                include_once GRAVITY_FORMS_BRAINTREE_DIR_PATH.'templates/'.$template;
-                $order_summary_markup = ob_get_contents();
-                ob_get_clean();
-
             }
         }
+
+        $template = 'view-pricing-fields-html.php';
+        if( !empty( $_GET['page'] ) && $_GET['page'] === 'gf_entries' && !empty( $_GET['view'] ) && $_GET['view'] === 'entry' ) {
+            $template = 'view-order-summary.php';
+        }
+
+        ob_start();
+        include_once GRAVITY_FORMS_BRAINTREE_DIR_PATH.'templates/'.$template;
+        $order_summary_markup = ob_get_contents();
+        ob_get_clean();
 
         return $order_summary_markup;
     }
