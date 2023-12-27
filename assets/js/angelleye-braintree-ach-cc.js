@@ -249,6 +249,7 @@ function manageACHPaymentActions(form_id) {
     let paymentProcess = document.getElementById('gform_payment_pay_'+form_id);
     if( undefined !== paymentProcess && null !== paymentProcess ) {
         paymentProcess.addEventListener('click', function () {
+            paymentProcess.classList.add('loader');
             manageACHGfromFields(form_id);
             manageACHScrollIntoView('gform_preview_'+form_id);
             document.getElementById('gform_'+form_id).submit();

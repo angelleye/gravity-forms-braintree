@@ -220,6 +220,7 @@ if ( ! class_exists( 'Angelleye_Gravity_Braintree_CreditCard_Field' ) ) {
                     let paymentProcess = document.getElementById('gform_payment_pay_'+form_id);
                     if( undefined !== paymentProcess && null !== paymentProcess ) {
                         paymentProcess.addEventListener('click', function () {
+                            paymentProcess.classList.add('loader');
                             manageGfromFields(form_id);
                             document.getElementById('gform_'+form_id).submit();
                         });

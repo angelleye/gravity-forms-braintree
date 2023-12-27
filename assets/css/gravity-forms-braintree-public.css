@@ -3,3 +3,6 @@
 .gform-preview table th, .gform-preview strong {font-weight: bold;}
 .gform-preview table td, .gform-preview table th {border: 1px solid #CCC;padding: 1rem;}
 .gform-preview .summary-actions {display: flex;gap: 2rem;justify-content: center;}
+.loader {position: relative;}
+.loader:after {content: "" !important;border: 5px solid #FFF;border-top: 5px solid #000;border-radius: 50%;width: 20px;height: 20px;animation: spin 2s linear infinite;}
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
