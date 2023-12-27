@@ -20,7 +20,6 @@ class AngelleyeGravityBraintreeFieldMapping
         add_filter('angelleye_braintree_parameter', array($this, 'manage_convenience_fees'),15, 4);
         add_filter('gform_entry_created', array($this, 'manage_transaction_response'),10, 2);
         add_filter('gform_order_summary', array($this, 'gform_order_summary'),10, 5);
-
         add_filter( 'gform_field_content', array($this,'addNoticeToCreditCardForm'), 10, 5 );
     }
 
@@ -165,11 +164,16 @@ class AngelleyeGravityBraintreeFieldMapping
         return $field_content;
     }
 
+    /**
+     * Manage convenience fees on payment request.
+     *
+     * @param array $args Get payment arguments.
+     * @param array $submission_data Get form submission data.
+     * @param array $form Get selected form.
+     * @param array $entry Get form current entry.
+     * @return array
+     */
     public function manage_convenience_fees( $args, $submission_data, $form, $entry ) {
-
-        if( ! function_exists('angelleye_get_extra_fees') ) {
-            require_once GRAVITY_FORMS_BRAINTREE_DIR_PATH.'includes/angelleye-functions.php';
-        }
 
         $form_id = absint( rgar( $form, 'id' ) );
         $extra_fees = angelleye_get_extra_fees( $form_id );
@@ -196,7 +200,7 @@ class AngelleyeGravityBraintreeFieldMapping
                     $quantity_id = !empty( $product_field['quantity_id'] ) ? get_product_field_filter( $product_field['quantity_id'] ) : '';
                 }
 
-                $product_price = !empty( $_POST[$price_id] ) ? get_price_without_fomatter( $_POST[$price_id] ) : 0;
+                $product_price = !empty( $_POST[$price_id] ) ? get_price_without_formatter( $_POST[$price_id] ) : 0;
                 $product_qty = !empty( $_POST[$quantity_id] ) ? $_POST[$quantity_id] : 1;
 
                 $label = !empty( $product_price ) ? get_selected_product_label( $product_price, $label ) : '';
@@ -224,7 +228,7 @@ class AngelleyeGravityBraintreeFieldMapping
                 $label = !empty( $cart_product['label'] ) ? $cart_product['label'] : esc_html__( 'Product', 'angelleye-gravity-forms-braintree' );
                 $product_price = !empty( $cart_product['price'] ) ? $cart_product['price'] : '';
                 $product_quantity = !empty( $cart_product['quantity'] ) ? $cart_product['quantity'] : '';
-                $item_unit_amount = get_price_without_fomatter($product_price);
+                $item_unit_amount = get_price_without_formatter($product_price);
                 $total_item_amount = $item_unit_amount * $product_quantity;
 
                 $line_items[] = [
@@ -241,7 +245,7 @@ class AngelleyeGravityBraintreeFieldMapping
 
             if( !empty( $cart_prices['convenience_fee'] ) ) {
 
-                $convenience_fee_amount = get_price_without_fomatter($cart_prices['convenience_fee']);
+                $convenience_fee_amount = get_price_without_formatter($cart_prices['convenience_fee']);
                 $line_items[] = [
                     'name' => !empty( $extra_fees_label ) ? $extra_fees_label : esc_html__('Convenience Fee', 'angelleye-gravity-forms-braintree'),
                     'kind' => Braintree\TransactionLineItem::DEBIT,
@@ -256,7 +260,7 @@ class AngelleyeGravityBraintreeFieldMapping
 
             $args['lineItems'] = $line_items;
 
-            $total = !empty( $cart_prices['total'] ) ? get_price_without_fomatter( $cart_prices['total'] ) : '';
+            $total = !empty( $cart_prices['total'] ) ? get_price_without_formatter( $cart_prices['total'] ) : '';
             if( !empty( $total ) ) {
                 $args['amount'] = $total;
             }
@@ -265,11 +269,14 @@ class AngelleyeGravityBraintreeFieldMapping
         return $args;
     }
 
+    /**
+     * Manage convenience fees on transaction response.
+     *
+     * @param array $entry Get form entry.
+     * @param array $form Get current form.
+     * @return void
+     */
     public function manage_transaction_response(  $entry, $form ) {
-
-        if( ! function_exists('angelleye_get_extra_fees') ) {
-            require_once GRAVITY_FORMS_BRAINTREE_DIR_PATH.'includes/angelleye-functions.php';
-        }
 
         $form_id = absint( rgar( $form, 'id' ) );
         $entry_id   = absint( rgar( $entry, 'id' ) );
@@ -300,7 +307,7 @@ class AngelleyeGravityBraintreeFieldMapping
                         $quantity_id = !empty( $product_field['quantity_id'] ) ? get_product_field_filter( $product_field['quantity_id'] ) : '';
                     }
 
-                    $product_price = !empty( $_POST[$price_id] ) ? get_price_without_fomatter( $_POST[$price_id] ) : 0;
+                    $product_price = !empty( $_POST[$price_id] ) ? get_price_without_formatter( $_POST[$price_id] ) : 0;
                     $product_qty = !empty( $_POST[$quantity_id] ) ? $_POST[$quantity_id] : 1;
 
                     $label = !empty( $product_price ) ? get_selected_product_label( $product_price, $label ) : '';
@@ -327,6 +334,16 @@ class AngelleyeGravityBraintreeFieldMapping
         gform_update_meta( $entry_id, 'gform_transaction_response', $transaction_response );
     }
 
+    /**
+     * Get gravity form pricing and order summary html.
+     *
+     * @param string $order_summary_markup Get order summary html.
+     * @param array $form Get current form.
+     * @param array $lead Get current form entry,
+     * @param array $products Get order summary products.
+     * @param string $type Format that should be used to display the summary ('html' or 'text').
+     * @return false|mixed|string
+     */
     public function gform_order_summary( $order_summary_markup, $form, $lead, $products, $type ) {
 
         $form_id   = absint( rgar( $form, 'id' ) );
@@ -355,9 +372,9 @@ class AngelleyeGravityBraintreeFieldMapping
                 $convenience_fee = !empty( $response['convenience_fee'] ) ? $response['convenience_fee'] : 0;
 
                 $order_summary['totals']['sub_total_money'] = $sub_total;
-                $order_summary['totals']['sub_total'] = get_price_without_fomatter($sub_total);
+                $order_summary['totals']['sub_total'] = get_price_without_formatter($sub_total);
                 $order_summary['totals']['total_money'] = $total;
-                $order_summary['totals']['total'] = get_price_without_fomatter($total);
+                $order_summary['totals']['total'] = get_price_without_formatter($total);
 
                 $order_summary['rows']['footer'] = [
                     [

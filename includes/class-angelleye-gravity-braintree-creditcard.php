@@ -86,10 +86,6 @@ if ( ! class_exists( 'Angelleye_Gravity_Braintree_CreditCard_Field' ) ) {
 
             ob_start();
 
-            if( ! function_exists('angelleye_get_extra_fees') ) {
-                require_once GRAVITY_FORMS_BRAINTREE_DIR_PATH.'includes/angelleye-functions.php';
-            }
-
             $extra_fees = angelleye_get_extra_fees( $form_id );
 
             $gfb_obj = [

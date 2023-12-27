@@ -140,11 +140,12 @@ class AngelleyeGravityFormsBraintree{
         return $is_active=='1';
     }
 
+    /**
+     * Get Payment summary html.
+     *
+     * @return void
+     */
     public function gform_payment_preview_html() {
-
-        if( ! function_exists('angelleye_get_extra_fees') ) {
-            require_once GRAVITY_FORMS_BRAINTREE_DIR_PATH.'includes/angelleye-functions.php';
-        }
 
         $status = false;
         $preview_html = '';
@@ -194,7 +195,7 @@ class AngelleyeGravityFormsBraintree{
                     if( !empty( $form_data ) && is_array( $form_data ) ) {
                         foreach ( $form_data as $data ) {
                             if( !empty( $data['name'] ) && $data['name'] == $price_id ) {
-                                $product_price = !empty( $data['value'] ) ? get_price_without_fomatter( $data['value'] ) : '';
+                                $product_price = !empty( $data['value'] ) ? get_price_without_formatter( $data['value'] ) : '';
                                 $label = !empty( $data['value'] ) ? get_selected_product_label( $data['value'], $label ) : '';
                             } elseif ( !empty( $data['name'] ) && $data['name'] == $quantity_id ) {
                                 $product_qty = !empty( $data['value'] ) ? $data['value'] : 1;
@@ -290,6 +291,15 @@ class AngelleyeGravityFormsBraintree{
         wp_send_json( $response);
     }
 
+    /**
+     * Update Braintree CC entry field value.
+     *
+     * @param string $display_value Get display value
+     * @param array $field Get field.
+     * @param array $lead Get entry value
+     * @param array $form Get form
+     * @return mixed|string
+     */
     public function gform_entry_field_value( $display_value, $field, $lead, $form ) {
 
         if( !empty( $display_value ) && is_array( $display_value ) && !empty( $field->type ) && $field->type === 'braintree_credit_card' ) {
