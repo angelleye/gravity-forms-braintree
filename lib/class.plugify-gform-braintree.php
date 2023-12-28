@@ -710,7 +710,7 @@ final class Plugify_GForm_Braintree extends GFPaymentAddOn {
                         'type'          => 'toggle',
                         'label'         => esc_html__( 'Override Global Settings', 'angelleye-gravity-forms-braintree' ),
                         'default_value' => false,
-                        'tooltip'       => '<strong>' . __( 'Override Global Settings', 'angelleye-gravity-forms-braintree' ) . '</strong>' . __( 'Override the global extra fees settings.', 'angelleye-gravity-forms-braintree' ),
+                        'tooltip'       => '<strong>' . __( 'Override Global Settings', 'angelleye-gravity-forms-braintree' ) . '</strong>' . __( 'If you would like this specific form/feed to use different values than what are configured in the global Braintree settings, you may override them here.', 'angelleye-gravity-forms-braintree' ),
                     ],
                     [
                         'name'          => 'extra_fee_label',
