@@ -171,6 +171,12 @@ if ( ! class_exists( 'Angelleye_Gravity_Braintree_CreditCard_Field' ) ) {
 
                     if( undefined !== payload.type && null !== payload.type  ) {
 
+                        let binDataDebit = payload?.binData?.debit;
+                        let paymentCardType = payload.type;
+                        if( binDataDebit.toLowerCase() === 'yes' || binDataDebit === true) {
+                            paymentCardType = 'DebitCard';
+                        }
+
                         jQuery.ajax({
                             type: 'POST',
                             dataType: 'json',
@@ -178,7 +184,7 @@ if ( ! class_exists( 'Angelleye_Gravity_Braintree_CreditCard_Field' ) ) {
                             data: {
                                 action: 'gform_payment_preview_html',
                                 nonce: '<?php echo wp_create_nonce('preview-payment-nonce'); ?>',
-                                card_type: payload.type,
+                                card_type: paymentCardType,
                                 form_id: form_id,
                                 form_data: jQuery('#gform_'+form_id).serializeArray()
                             },
