@@ -703,7 +703,7 @@ final class Plugify_GForm_Braintree extends GFPaymentAddOn {
             ];
 
             $extra_fee_settings = [
-                'title'      => esc_html__( 'Extra Fee Settings', 'angelleye-gravity-forms-braintree' ),
+                'title'      => esc_html__( 'Extra Fee Settings (%)', 'angelleye-gravity-forms-braintree' ),
                 'fields' => [
                     [
                         'name'          => 'override_extra_fees',
