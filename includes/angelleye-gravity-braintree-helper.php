@@ -293,7 +293,7 @@ function get_gfb_format_price( $price = 0, $symbol = true ) {
     $symbol_left  = ! empty( $currency['symbol_left'] ) ? $currency['symbol_left'] . $symbol_padding : '';
     $symbol_right = ! empty( $currency['symbol_right'] ) ? $symbol_padding. $currency['symbol_right'] : '';
 
-    if( !empty( $price ) && $price >= 0 ) {
+    if( $price >= 0 ) {
         $price = number_format( $price, $currency['decimals'], $currency['decimal_separator'], $currency['thousand_separator'] );
     }
 
