@@ -697,7 +697,7 @@ final class Plugify_GForm_Braintree extends GFPaymentAddOn {
                         'choices'       => $this->merchant_account_choices(),
                         'required'      => false,
                         'default_value' => '',
-                        'tooltip'       => ''
+                        'tooltip'       => 'By default the payment will be processed by your primary Braintree merchant account.  If you have multiple merchant accounts configured, you can specify which one this form should pay to here.  
                     ]
                 ],
             ];
