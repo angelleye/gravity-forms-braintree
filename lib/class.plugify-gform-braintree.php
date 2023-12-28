@@ -979,9 +979,9 @@ final class Plugify_GForm_Braintree extends GFPaymentAddOn {
                     array(
                         'name'          => 'enable_extra_fees',
                         'type'          => 'toggle',
-                        'label'         => esc_html__( 'Enable Extra Fee', 'angelleye-gravity-forms-braintree' ),
+                        'label'         => esc_html__( 'Enable Extra Fee (%)', 'angelleye-gravity-forms-braintree' ),
                         'default_value' => false,
-                        'tooltip'       => '<strong>' . __( 'Extra Fee', 'angelleye-gravity-forms-braintree' ) . '</strong>' . __( 'Enable this to collect a convenience fee on credit card, debit card and/or ACH payments.', 'angelleye-gravity-forms-braintree' ),
+                        'tooltip'       => '<strong>' . __( 'Extra Fee', 'angelleye-gravity-forms-braintree' ) . '</strong>' . __( 'Enable this and set a percentage (%) to collect a convenience fee on credit card, debit card and/or ACH payments.', 'angelleye-gravity-forms-braintree' ),
                     ),
                     array(
                         'name'          => 'extra_fee_label',
