@@ -253,7 +253,12 @@ if ( ! class_exists( 'Angelleye_Gravity_Braintree_CreditCard_Field' ) ) {
 			                    dropinInstance.requestPaymentMethod((error, payload) => {
 			                        if (error) console.error(error);
 			                        document.getElementById('nonce_<?php echo $form_id; ?>').value = payload.nonce;
-			                        document.getElementById('payment_card_type_<?php echo $form_id; ?>').value = payload.type;
+                                    let binDataDebit = payload?.binData?.debit;
+                                    let paymentCardType = payload.type;
+                                    if( binDataDebit.toLowerCase() === 'yes' || binDataDebit === true) {
+                                        paymentCardType = 'DebitCard';
+                                    }
+			                        document.getElementById('payment_card_type_<?php echo $form_id; ?>').value = paymentCardType;
                                     let cardType = payload.details.cardType;
                                     let cardLastFour = payload.details.lastFour;
                                     document.getElementById('payment_card_details_<?php echo $form_id; ?>').value = cardLastFour+" ("+cardType+")";
@@ -281,7 +286,12 @@ if ( ! class_exists( 'Angelleye_Gravity_Braintree_CreditCard_Field' ) ) {
 	                        dropinInstance.requestPaymentMethod((error, payload) => {
 	                            if (error) console.error(error);
 	                            document.getElementById('nonce_<?php echo $form_id; ?>').value = payload.nonce;
-                                document.getElementById('payment_card_type_<?php echo $form_id; ?>').value = payload.type;
+                                let binDataDebit = payload?.binData?.debit;
+                                let paymentCardType = payload.type;
+                                if( binDataDebit.toLowerCase() === 'yes' || binDataDebit === true) {
+                                    paymentCardType = 'DebitCard';
+                                }
+                                document.getElementById('payment_card_type_<?php echo $form_id; ?>').value = paymentCardType;
                                 let cardType = payload.details.cardType;
                                 let cardLastFour = payload.details.lastFour;
                                 document.getElementById('payment_card_details_<?php echo $form_id; ?>').value = cardLastFour+" ("+cardType+")";
