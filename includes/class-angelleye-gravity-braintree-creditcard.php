@@ -251,7 +251,7 @@ if ( ! class_exists( 'Angelleye_Gravity_Braintree_CreditCard_Field' ) ) {
                     }
                 }
 
-                if(typeof braintree === 'undefined') {
+                if(typeof braintree === 'undefined' || typeof braintree.dropin === 'undefined' ) {
 			        // console.log("Braintree is not loaded yet. Loading...");
 			        var script = document.createElement('script');
 			        script.onload = function () {
