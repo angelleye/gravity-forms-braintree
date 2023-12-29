@@ -286,6 +286,8 @@ function get_product_fields_by_form_id(  $form_id ) {
  */
 function get_gfb_format_price( $price = 0, $symbol = true ) {
 
+    $price = (float)$price;
+
     $currency_code = GFCommon::get_currency();
     $currency = RGCurrency::get_currency($currency_code);
     $symbol_padding = !empty( $currency['symbol_padding'] ) ? $currency['symbol_padding'] : '';
@@ -374,7 +376,7 @@ function get_price_without_formatter( $price ) {
         $price = !empty( $temp_price[1] ) ? $temp_price[1] : 0;
     }
 
-    return preg_replace('/[^0-9.,]/', '', $price );
+    return preg_replace('/[^0-9.]/', '', $price );
 }
 
 /**

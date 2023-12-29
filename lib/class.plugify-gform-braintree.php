@@ -202,8 +202,14 @@ final class Plugify_GForm_Braintree extends GFPaymentAddOn {
 
                             $this->log_debug("Braintree_ACH::SUCCESS");
                         } else {
-                            if (isset($sale_response->transaction->processorResponseText)) {
-                                $authorization['error_message'] = sprintf('Your bank did not authorized the transaction: %s.', $sale_response->transaction->processorResponseText);
+
+                            $processorResponseText = !empty( $sale_response->message ) ? $sale_response->message : '';
+                            if( !empty( $sale_response->transaction->processorResponseText ) && strtolower( $sale_response->transaction->processorResponseText ) !== 'unavailable' ) {
+                                $processorResponseText = $sale_response->transaction->processorResponseText;
+                            }
+
+                            if ( !empty( $processorResponseText ) ) {
+                                $authorization['error_message'] = sprintf('Your bank did not authorized the transaction: %s.', $processorResponseText);
                             } else {
                                 $authorization['error_message'] = sprintf('Your bank declined the transaction, please try again or contact bank.');
                             }
@@ -245,6 +251,15 @@ final class Plugify_GForm_Braintree extends GFPaymentAddOn {
         if ($this->selected_payment_method == 'braintree_ach') {
             foreach ($validation_result['form']['fields'] as &$field) {
                 if ($field->type == 'braintree_ach') {
+                    $field->failed_validation = true;
+                    $field->validation_message = $authorization_result['error_message'];
+                    $credit_card_page = $field->pageNumber;
+                    break;
+                }
+            }
+        } elseif ( $this->selected_payment_method === 'braintree_credit_card') {
+            foreach ($validation_result['form']['fields'] as &$field) {
+                if ($field->type == 'braintree_credit_card') {
                     $field->failed_validation = true;
                     $field->validation_message = $authorization_result['error_message'];
                     $credit_card_page = $field->pageNumber;
@@ -328,8 +343,14 @@ final class Plugify_GForm_Braintree extends GFPaymentAddOn {
                         'payment_method' => 'Credit Card'
                     );
                 } else {
-                    if (isset($result->transaction->processorResponseText)) {
-                        $authorization['error_message'] .= sprintf('. Your bank said: %s.', $result->transaction->processorResponseText);
+
+                    $processorResponseText = !empty( $result->message ) ? $result->message : '';
+                    if( !empty( $result->transaction->processorResponseText ) && strtolower( $result->transaction->processorResponseText ) !== 'unavailable' ) {
+                        $processorResponseText = $result->transaction->processorResponseText;
+                    }
+
+                    if ( !empty( $processorResponseText ) ) {
+                        $authorization['error_message'] .= sprintf('. Your bank said: %s.', $processorResponseText);
                     }
                 }
             }
@@ -430,8 +451,14 @@ final class Plugify_GForm_Braintree extends GFPaymentAddOn {
                     } else {
                         // Append gateway response text to error message if it exists. If it doesn't exist, a more hardcore
                         // failure has occured and it won't do the user any good to see it other than a general error message
-                        if (isset($result->transaction->processorResponseText)) {
-                            $authorization['error_message'] .= sprintf('. Your bank said: %s.', $result->transaction->processorResponseText);
+
+                        $processorResponseText = !empty( $result->message ) ? $result->message : '';
+                        if( !empty( $result->transaction->processorResponseText ) && strtolower( $result->transaction->processorResponseText ) !== 'unavailable' ) {
+                            $processorResponseText = $result->transaction->processorResponseText;
+                        }
+
+                        if ( !empty( $processorResponseText ) ) {
+                            $authorization['error_message'] .= sprintf('. Your bank said: %s.', $processorResponseText);
                         }
                     }
                 }
@@ -554,8 +581,13 @@ final class Plugify_GForm_Braintree extends GFPaymentAddOn {
                     );
                 } else {
                     $setup_fee_result = false;
-                    if (isset($result->transaction->processorResponseText)) {
-                        $authorization['error_message'] .= sprintf('. Your bank said: %s.', $result->transaction->processorResponseText);
+
+                    $processorResponseText = !empty( $result->message ) ? $result->message : '';
+                    if( !empty( $result->transaction->processorResponseText ) && strtolower( $result->transaction->processorResponseText ) !== 'unavailable' ) {
+                        $processorResponseText = $result->transaction->processorResponseText;
+                    }
+                    if ( !empty( $processorResponseText ) ) {
+                        $authorization['error_message'] .= sprintf('. Your bank said: %s.', $processorResponseText);
                     }
                 }
             }

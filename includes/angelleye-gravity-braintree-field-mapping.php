@@ -229,15 +229,21 @@ class AngelleyeGravityBraintreeFieldMapping
                 $product_price = !empty( $cart_product['price'] ) ? $cart_product['price'] : '';
                 $product_quantity = !empty( $cart_product['quantity'] ) ? $cart_product['quantity'] : '';
                 $item_unit_amount = get_price_without_formatter($product_price);
-                $total_item_amount = $item_unit_amount * $product_quantity;
 
-                $line_items[] = [
-                    'name' => $label,
-                    'kind' => Braintree\TransactionLineItem::DEBIT,
-                    'quantity' => $product_quantity,
-                    'unitAmount' => $item_unit_amount,
-                    'totalAmount' => $total_item_amount,
-                ];
+                if( !empty( $item_unit_amount ) && $item_unit_amount > 0 ) {
+
+                    $total_item_amount = $item_unit_amount * $product_quantity;
+                    $item_unit_amount = get_gfb_format_price( $item_unit_amount, false);
+                    $total_item_amount = get_gfb_format_price($total_item_amount, false);
+
+                    $line_items[] = [
+                        'name' => $label,
+                        'kind' => Braintree\TransactionLineItem::DEBIT,
+                        'quantity' => $product_quantity,
+                        'unitAmount' => get_price_without_formatter($item_unit_amount),
+                        'totalAmount' => get_price_without_formatter($total_item_amount),
+                    ];
+                }
             }
         }
 
@@ -246,13 +252,18 @@ class AngelleyeGravityBraintreeFieldMapping
             if( !empty( $cart_prices['convenience_fee'] ) ) {
 
                 $convenience_fee_amount = get_price_without_formatter($cart_prices['convenience_fee']);
-                $line_items[] = [
-                    'name' => !empty( $extra_fees_label ) ? $extra_fees_label : esc_html__('Convenience Fee', 'angelleye-gravity-forms-braintree'),
-                    'kind' => Braintree\TransactionLineItem::DEBIT,
-                    'quantity' => 1,
-                    'unitAmount' => $convenience_fee_amount,
-                    'totalAmount' => $convenience_fee_amount,
-                ];
+                $convenience_fee_amount = get_gfb_format_price( $convenience_fee_amount, false);
+
+                if( !empty( $convenience_fee_amount ) && $convenience_fee_amount > 0 ) {
+
+                    $line_items[] = [
+                        'name' => !empty($extra_fees_label) ? $extra_fees_label : esc_html__('Convenience Fee', 'angelleye-gravity-forms-braintree'),
+                        'kind' => Braintree\TransactionLineItem::DEBIT,
+                        'quantity' => 1,
+                        'unitAmount' => get_price_without_formatter($convenience_fee_amount),
+                        'totalAmount' => get_price_without_formatter($convenience_fee_amount),
+                    ];
+                }
             }
         }
 
@@ -262,7 +273,8 @@ class AngelleyeGravityBraintreeFieldMapping
 
             $total = !empty( $cart_prices['total'] ) ? get_price_without_formatter( $cart_prices['total'] ) : '';
             if( !empty( $total ) ) {
-                $args['amount'] = $total;
+                $total = get_gfb_format_price($total, false);
+                $args['amount'] = get_price_without_formatter($total);
             }
         }
 

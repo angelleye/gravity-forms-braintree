@@ -129,16 +129,25 @@ if ( ! class_exists( 'Angelleye_Gravity_Braintree_CreditCard_Field' ) ) {
                     let gformFields = document.getElementById('gform_fields_'+form_id);
                     if( undefined !== gformFields && null !== gformFields ) {
                         gformFields.classList.add('fields-preview');
-                        var inputElements = gformFields.querySelectorAll('input, input[type="text"], input[type="number"], input[type="radio"], input[type="checkbox"], select, textarea');
-                        inputElements.forEach(function(element) {
-                            if( is_preview ) {
-                                element.readOnly = true;
-                                element.disabled = true;
-                            } else {
-                                element.readOnly = false;
-                                element.disabled = false;
-                            }
-                        });
+                        let inputElements = gformFields.querySelectorAll('input, input[type="text"], input[type="number"], input[type="radio"], input[type="checkbox"], select, textarea');
+                        if( undefined !== inputElements && null !== inputElements ) {
+                            inputElements.forEach(function (element) {
+                                if (is_preview) {
+                                    element.readOnly = true;
+                                    element.disabled = true;
+                                } else {
+                                    element.readOnly = false;
+                                    element.disabled = false;
+                                }
+                            });
+                        }
+
+                        let captchaEle = gformFields.querySelectorAll('.gfield.gfield--type-captcha');
+                        if( undefined !== captchaEle && null !== captchaEle ){
+                            captchaEle.forEach(function (element) {
+                                element.style.display = 'none';
+                            });
+                        }
                     }
 
                     let gformFooter = form.querySelectorAll('.gform_footer');
