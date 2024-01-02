@@ -554,6 +554,12 @@ function loadBraintreeDropIn( form_id, args = [] ) {
 
                 element.addEventListener(gformBCCEvent, event => {
                     event.preventDefault();
+
+                    let gFormAjaxLoader = document.getElementById('gform_ajax_spinner_'+form_id);
+                    if(undefined !== gFormAjaxLoader ) {
+                        gFormAjaxLoader.remove();
+                    }
+
                     let loaderEl = element;
                     if( gformBCCEvent === 'submit' ) {
                         let currentGform = document.getElementById(gformBCCEle);
