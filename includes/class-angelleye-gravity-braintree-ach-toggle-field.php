@@ -58,7 +58,7 @@ class Angelleye_Gravity_Braintree_ACH_Toggle_Field extends GF_Field {
 		if(!$is_form_editor && !$is_entry_detail){
 			foreach ($form['fields'] as $single_field) {
 
-				if ($single_field->type == 'creditcard')
+				if ($single_field->type == 'braintree_credit_card')
 					$cc_field_id = $single_field->id;
 				else if($single_field->type=='braintree_ach') {
 					$ach_field_id = $single_field->id;
@@ -67,14 +67,17 @@ class Angelleye_Gravity_Braintree_ACH_Toggle_Field extends GF_Field {
 		}
 
 		$payment_options = '';
-		$payment_methods = [['key' => 'creditcard', 'label'=>'Credit Card', 'field_id' => $cc_field_id],
+		$payment_methods = [['key' => 'braintree_credit_card', 'label'=>'Credit Card', 'field_id' => $cc_field_id],
 			['key' => 'braintree_ach', 'label' => 'ACH', 'field_id' => $ach_field_id]];
 		foreach ( $payment_methods as $payment_method ) {
 			$checked = rgpost( "input_{$id}_1" ) == $payment_method['key'] ? "checked='checked'" : '';
+            if(empty( $checked ) && $payment_method['key'] == 'braintree_credit_card' ) {
+                $checked = "checked='checked'";
+            }
 			$payment_options .= "<div class='gform_payment_method_option gform_payment_{$payment_method['key']}'><input type='radio' name='input_{$id}.1' value='{$payment_method['key']}' id='gform_payment_method_{$payment_method['key']}' targetdiv='field_{$form_id}_{$payment_method['field_id']}' {$checked}/> {$payment_method['label']}</div>";
 		}
 
-		return "<div class='ginput_container gform_payment_method_options ginput_container_{$this->type}' id='{$field_id}'>" .$payment_options
+		return "<div class='ginput_container gform_payment_method_options gform_payment_method_toggle_options ginput_container_{$this->type}' id='{$field_id}' data-form_id='{$form_id}'>" .$payment_options
 		       . ' </div>';
 	}
 
@@ -103,7 +106,7 @@ class Angelleye_Gravity_Braintree_ACH_Toggle_Field extends GF_Field {
 	public function validate( $value, $form ) {
 		$toggle_selected 	= rgpost( 'input_' . $this->id.'_1' );
 
-		if (empty( $toggle_selected ) || !in_array($toggle_selected, ['creditcard','braintree_ach']) ) {
+		if (empty( $toggle_selected ) || !in_array($toggle_selected, ['creditcard','braintree_ach','braintree_credit_card']) ) {
 			$this->failed_validation  = true;
 			$this->validation_message = empty( $this->errorMessage ) ? __( 'Please select a payment method.', 'gravity-forms-braintree' ) : $this->errorMessage;
 		}
@@ -167,7 +170,7 @@ class Angelleye_Gravity_Braintree_ACH_Toggle_Field extends GF_Field {
 			case 1:
 				if($value=='braintree_ach')
 					$return = 'Braintree ACH Direct Debit';
-				else if($value=='creditcard')
+				else if($value=='creditcard' || $value == 'braintree_credit_card')
 						$return = 'Credit Card';
 				break;
 		}

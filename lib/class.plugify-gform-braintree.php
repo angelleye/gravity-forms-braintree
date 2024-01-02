@@ -16,7 +16,7 @@ final class Plugify_GForm_Braintree extends GFPaymentAddOn {
     protected $_enable_rg_autoupgrade = true;
     protected $is_payment_gateway = true;
     protected $current_feed = true;
-    protected $selected_payment_method = 'creditcard';
+    protected $selected_payment_method = 'braintree_credit_card';
 
     /**
      * Class constructor. Send __construct call to parent
@@ -1252,6 +1252,7 @@ final class Plugify_GForm_Braintree extends GFPaymentAddOn {
             $translation_array['ach_bt_nonce'] = wp_create_nonce('preview-payment-nonce');
             $translation_array['ach_bt_token'] = @$settings['tokenization-key'];
             $translation_array['ach_business_name'] = @$settings['business-name'];
+            $translation_array['is_admin'] = is_admin();
         }
 
         $scripts = array(
@@ -1263,7 +1264,7 @@ final class Plugify_GForm_Braintree extends GFPaymentAddOn {
                 'in_footer' => false,
                 'callback' => array($this, 'localize_scripts'),
                 'enqueue' => array(
-                    array('field_types' => array('braintree_ach'))
+                    array('field_types' => array('braintree_ach','braintree_credit_card'))
                 )
             ),
             array(
@@ -1274,7 +1275,7 @@ final class Plugify_GForm_Braintree extends GFPaymentAddOn {
                 'in_footer' => false,
                 'callback' => array($this, 'localize_scripts'),
                 'enqueue' => array(
-                    array('field_types' => array('braintree_ach'))
+                    array('field_types' => array('braintree_ach','braintree_credit_card'))
                 )
             ),
             array(
@@ -1285,7 +1286,7 @@ final class Plugify_GForm_Braintree extends GFPaymentAddOn {
                 'in_footer' => false,
                 'callback' => array($this, 'localize_scripts'),
                 'enqueue' => array(
-                    array('field_types' => array('braintree_ach'))
+                    array('field_types' => array('braintree_ach','braintree_credit_card'))
                 )
             ),
             array(
@@ -1302,7 +1303,7 @@ final class Plugify_GForm_Braintree extends GFPaymentAddOn {
 //						'admin_page' => array( 'form_settings' ),
 //						'tab'        => 'simpleaddon'
 //					)
-                    array('field_types' => array('braintree_ach'))
+                    array('field_types' => array('braintree_ach','braintree_credit_card'))
                 )
             ),
         );
