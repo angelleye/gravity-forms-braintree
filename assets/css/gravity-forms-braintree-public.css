@@ -5,5 +5,6 @@
 .gform-preview .summary-actions {display: flex;gap: 2rem;justify-content: center;}
 .loader {position: relative;}
 .loader:after {content: "" !important;border: 5px solid #ccc;border-top: 5px solid #000;border-radius: 50%;width: 20px;height: 20px;animation: spin 2s linear infinite;display: inline-flex;margin-left: 10px;}
+.gform-body .loader:before, .gform_footer .loader:before{content: unset !important;}
 .braintree_cc_submit_btn {margin-left: 0 !important;}
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }

@@ -505,6 +505,7 @@ function displayPaymentPreview( payload, form_id, args = [] ) {
                     let gFormPreview = document.getElementById('gform_preview_'+form_id);
                     gFormPreview.innerHTML = result.html;
                     managePaymentActions(form_id, args);
+                    manageGfromFields(form_id, true, args);
                     removeGformLoader(form_id);
                 } else {
                     location.reload();
@@ -517,7 +518,6 @@ function displayPaymentPreview( payload, form_id, args = [] ) {
 function managePreviewBeforePayment( payload, form_id, args = [] ) {
 
     displayPaymentPreview(payload, form_id, args);
-    manageGfromFields(form_id, true, args);
 }
 
 function loadBraintreeDropIn( form_id, args = [] ) {
