@@ -569,6 +569,7 @@ function loadBraintreeDropIn( form_id, args = [] ) {
                     dropinInstance.requestPaymentMethod((error, payload) => {
                         if (error) {
                             console.error(error);
+                            removeGformLoader(form_id);
                         } else {
                             document.getElementById('nonce_'+form_id).value = payload.nonce;
                             let binDataDebit = payload?.binData?.debit;
