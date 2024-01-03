@@ -556,7 +556,7 @@ function loadBraintreeDropIn( form_id, args = [] ) {
                     event.preventDefault();
 
                     let gFormAjaxLoader = document.getElementById('gform_ajax_spinner_'+form_id);
-                    if(undefined !== gFormAjaxLoader ) {
+                    if(undefined !== gFormAjaxLoader && null !== gFormAjaxLoader ) {
                         gFormAjaxLoader.remove();
                     }
 
