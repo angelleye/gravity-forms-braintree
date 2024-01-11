@@ -112,6 +112,7 @@
 .loader:after {content: "" !important;border: 2px solid #FFF;border-top: 2px solid #5f6285;border-radius: 50%;width: 10px;height: 10px;animation: spin 2s linear infinite;display: inline-flex;margin-left: 10px;}
 #gform_setting_braintree_reports_details{max-width: calc(900px - 20px);}
 .transaction-report-history-wrap {overflow-x: scroll;}
+.transactions-report-lists table .file-name {max-width: 300px;word-wrap: break-word;}
 @media (min-width: 320px) {
     .transactions-report-wrap .field-row {flex-direction: row;}
     .transactions-report-wrap .field-row .filed-col{flex: 0 0 100%;}

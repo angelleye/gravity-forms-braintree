@@ -398,11 +398,11 @@ class AngelleyeGravityFormsBraintreeReports extends GFAddOn {
                 <table class="gform-table gform-table--responsive">
                     <thead>
                     <tr>
-                        <th scope="col"><?php esc_html_e('Braintree Report Files', 'angelleye-gravity-forms-braintree') ?></th>
-                        <th scope="col"><?php esc_html_e('Start Date', 'angelleye-gravity-forms-braintree') ?></th>
-                        <th scope="col"><?php esc_html_e('End Date', 'angelleye-gravity-forms-braintree') ?></th>
-                        <th scope="col"><?php esc_html_e('Merchant Account', 'angelleye-gravity-forms-braintree') ?></th>
-                        <th scope="col"><?php esc_html_e('Actions', 'angelleye-gravity-forms-braintree') ?></th>
+                        <th class="file-name"><?php esc_html_e('Braintree Report Files', 'angelleye-gravity-forms-braintree') ?></th>
+                        <th class="start-date"><?php esc_html_e('Start Date', 'angelleye-gravity-forms-braintree') ?></th>
+                        <th class="end-date"><?php esc_html_e('End Date', 'angelleye-gravity-forms-braintree') ?></th>
+                        <th class="merchant-account"><?php esc_html_e('Merchant Account', 'angelleye-gravity-forms-braintree') ?></th>
+                        <th class="actions"><?php esc_html_e('Actions', 'angelleye-gravity-forms-braintree') ?></th>
                     </tr>
                     </thead>
                     <tbody>
@@ -423,11 +423,11 @@ class AngelleyeGravityFormsBraintreeReports extends GFAddOn {
                                 );
                                 ?>
                                 <tr class="row_<?php echo esc_attr( $key ); ?>">
-                                    <td data-header="<?php esc_html_e('Braintree Report Files', 'angelleye-gravity-forms-braintree') ?>"><?php echo $report_file['file']; ?></td>
-                                    <td data-header="<?php esc_html_e('Start Date', 'angelleye-gravity-forms-braintree') ?>"><?php echo !empty( $report_file['start_date'] ) ? esc_html( $report_file['start_date'] ) : '-'; ?></td>
-                                    <td data-header="<?php esc_html_e('End Date', 'angelleye-gravity-forms-braintree') ?>"><?php echo !empty( $report_file['end_date'] ) ? esc_html( $report_file['end_date'] ) : '-'; ?></td>
-                                    <td data-header="<?php esc_html_e('Merchant Account', 'angelleye-gravity-forms-braintree') ?>"><?php echo !empty( $report_file['merchant_id'] ) ? esc_html( $report_file['merchant_id'] ) : '-'; ?></td>
-                                    <td data-header="<?php esc_html_e('Actions', 'angelleye-gravity-forms-braintree') ?>">
+                                    <td class="file-name" data-header="<?php esc_html_e('Braintree Report Files', 'angelleye-gravity-forms-braintree') ?>"><?php echo $report_file['file']; ?></td>
+                                    <td class="start-date" data-header="<?php esc_html_e('Start Date', 'angelleye-gravity-forms-braintree') ?>"><?php echo !empty( $report_file['start_date'] ) ? esc_html( $report_file['start_date'] ) : '-'; ?></td>
+                                    <td class="end-date" data-header="<?php esc_html_e('End Date', 'angelleye-gravity-forms-braintree') ?>"><?php echo !empty( $report_file['end_date'] ) ? esc_html( $report_file['end_date'] ) : '-'; ?></td>
+                                    <td class="merchant-account" data-header="<?php esc_html_e('Merchant Account', 'angelleye-gravity-forms-braintree') ?>"><?php echo !empty( $report_file['merchant_id'] ) ? esc_html( $report_file['merchant_id'] ) : '-'; ?></td>
+                                    <td class="actions" data-header="<?php esc_html_e('Actions', 'angelleye-gravity-forms-braintree') ?>">
                                         <ul class="actions">
                                             <li><a href="<?php echo esc_url( $view_report_url ); ?>" class="report-actions view-report"><span class="dashicons dashicons-visibility"></span></a></li>
                                             <li><a title="<?php esc_attr_e('Download Braintree transaction Report', 'angelleye-gravity-forms-braintree'); ?>" href="<?php echo esc_url($download_url); ?>" download class="report-actions download-report"><span class="dashicons dashicons-download"></span></a></li>
