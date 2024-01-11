@@ -71,28 +71,109 @@ jQuery(document).ready(function ($) {
         }).complete(function () {
             $('.updatemappingbtn').html('Update Mapping').removeAttr('disabled');
         });
+    });
 
-    })
-});
+    setTimeout(function() {
+        function manageExtraFeesFields( is_enable = false ) {
+            let extraFeesFields = document.querySelectorAll('input.extra-fees-input');
+            if( undefined !== extraFeesFields && extraFeesFields.length > 0 ) {
+                extraFeesFields.forEach(function ( field ){
+                    if(is_enable) {
+                        field.setAttribute('readonly', 'readonly');
+                    } else {
+                        field.removeAttribute('readonly');
+                    }
+                });
+            }
+        }
+        let disableExtraFee = document.getElementById('disable_extra_fees');
+        if( undefined !== disableExtraFee && null !== disableExtraFee ) {
+            manageExtraFeesFields(disableExtraFee.checked);
+            disableExtraFee.addEventListener('click', function (e) {
+                manageExtraFeesFields(disableExtraFee.checked);
+            });
+        }
+    }, 500);
 
-setTimeout(function() {
-    function manageExtraFeesFields( is_enable = false ) {
-        let extraFeesFields = document.querySelectorAll('input.extra-fees-input');
-        if( undefined !== extraFeesFields && extraFeesFields.length > 0 ) {
-            extraFeesFields.forEach(function ( field ){
-                if(is_enable) {
-                    field.setAttribute('readonly', 'readonly');
+    $('.datepicker').datetimepicker({
+        format: 'm/d/Y H:i',
+    });
+    
+    $( document ).on( "click",'.delete-report', function() {
+        let fileName = $(this).attr('data-file_name');
+        let transactionDir = $(this).attr('data-transaction_dir');
+        let ref_id = $(this).attr('data-ref_id');
+        if ( confirm(GFBraintreeObj.report_confirm) === true) {
+            jQuery.post(ajaxurl, {
+                action: 'angelleye_gform_braintree_report_delete',
+                file_name: fileName,
+                transaction_dir: transactionDir,
+            }, function ( response ) {
+
+                if( response.status ) {
+                    $('.transactions-report-lists  .'+ref_id).remove();
                 } else {
-                    field.removeAttribute('readonly');
+                 alert(response.message);
                 }
             });
         }
-    }
-    let disableExtraFee = document.getElementById('disable_extra_fees');
-    if( undefined !== disableExtraFee && null !== disableExtraFee ) {
-        manageExtraFeesFields(disableExtraFee.checked);
-        disableExtraFee.addEventListener('click', function (e) {
-            manageExtraFeesFields(disableExtraFee.checked);
-        });
-    }
-}, 500);
+    });
+
+    $( document ).on( "click",'#search_transactions', function( event ) {
+        event.preventDefault();
+        window.onbeforeunload = null;
+        let currentObj = $(this);
+        currentObj.addClass('loader');
+
+        remove_gfb_notification();
+
+        let action = $(this).attr('data-action');
+        let nonce = $(this).attr('data-nonce');
+        let start_date = $("#start_date").val();
+        let end_date = $("#end_date").val();
+        let merchant_account_id = $("#merchant_account_id").val();
+
+        if( start_date !== '' &&  end_date !== '' ) {
+
+            jQuery.post(ajaxurl, {
+                action: 'angelleye_gform_braintree_generate_report',
+                data_action: action,
+                data_nonce: nonce,
+                start_date: start_date,
+                end_date: end_date,
+                merchant_account_id: merchant_account_id,
+            }, function (response) {
+                let type = (response.status) ? 'success': 'error';
+                add_gfb_notification(response.message, type);
+                if( response.status ) {
+                    setTimeout(function (){
+                        window.location.href = response.redirect_url;
+                    }, 1000);
+                }
+
+                currentObj.removeClass('loader');
+            });
+        } else {
+
+            let errMsg ='';
+            if( start_date === '' )  {
+                errMsg  += '<span>'+GFBraintreeObj.start_date_required+'</span><br/>';
+            }
+
+            if( end_date === '' )  {
+                errMsg  += '<span>'+GFBraintreeObj.end_date_required+'</span><br/>';
+            }
+
+            add_gfb_notification(errMsg, 'error');
+            currentObj.removeClass('loader');
+        }
+    });
+});
+
+function remove_gfb_notification() {
+    jQuery('.notifications .notification').remove();
+}
+function add_gfb_notification( message, type= 'success' ) {
+    remove_gfb_notification();
+    jQuery('.notifications').append('<p class="notification '+type+'">'+message+'</p>');
+}

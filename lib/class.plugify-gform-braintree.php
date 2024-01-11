@@ -1229,13 +1229,24 @@ final class Plugify_GForm_Braintree extends GFPaymentAddOn {
     }
 
     public function enqueue_scripts_js() {
-        if (GFForms::is_gravity_page()) {
+
+        $is_report = !empty( $_GET['page'] ) && $_GET['page'] === 'gf_transaction_reports';
+
+        if (GFForms::is_gravity_page() || $is_report) {
+            wp_enqueue_script('datetimepicker-admin', GRAVITY_FORMS_BRAINTREE_ASSET_URL . 'assets/js/datetimepicker.min.js', array('jquery'), $this->_version, false);
             wp_enqueue_script('gravity-forms-braintree-admin', GRAVITY_FORMS_BRAINTREE_ASSET_URL . 'assets/js/gravity-forms-braintree-admin.js', array('jquery'), $this->_version, false);
+            wp_localize_script('gravity-forms-braintree-admin',  'GFBraintreeObj',[
+                'report_confirm' => __('Are you sure you want to delete this report file.','angelleye-gravity-forms-braintree'),
+                'start_date_required' => __('<strong>Start date</strong> is required field','angelleye-gravity-forms-braintree'),
+                'end_date_required' => __('<strong>End date</strong> is required field','angelleye-gravity-forms-braintree'),
+            ]);
         }
     }
 
     public function enqueue_styles_css() {
-        if (GFForms::is_gravity_page()) {
+        $is_report = !empty( $_GET['page'] ) && $_GET['page'] === 'gf_transaction_reports';
+        if (GFForms::is_gravity_page() || $is_report) {
+            wp_enqueue_style('datetimepicker-admin-css', GRAVITY_FORMS_BRAINTREE_ASSET_URL . 'assets/css/datetimepicker.min.css', array(), $this->_version, 'all');
             wp_enqueue_style('gravity-forms-braintree-admin-css', GRAVITY_FORMS_BRAINTREE_ASSET_URL . 'assets/css/gravity-forms-braintree-admin.css', array(), $this->_version, 'all');
         }
     }

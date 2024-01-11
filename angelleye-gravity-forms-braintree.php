@@ -65,6 +65,7 @@ class AngelleyeGravityFormsBraintree{
         add_action('wp_ajax_gform_payment_preview_html', [ $this, 'gform_payment_preview_html']);
         add_action('wp_ajax_nopriv_gform_payment_preview_html', [ $this, 'gform_payment_preview_html']);
         add_action('gform_entry_field_value', [ $this, 'gform_entry_field_value'], 10, 4);
+	    add_action( 'gform_settings_save_button', [$this, 'gform_settings_save_button']);
     }
 
     public function enqueue_scripts() {
@@ -109,6 +110,7 @@ class AngelleyeGravityFormsBraintree{
 	        require_once $path . 'lib/angelleye-gravity-forms-payment-logger.php';
             require_once $path . 'includes/angelleye-gravity-braintree-field-mapping.php';
             require_once $path . 'includes/class-angelleye-gravity-braintree-creditcard.php';
+            require_once $path . 'includes/class-angelleye-gravity-braintree-reports.php';
 
             /**
              * Required functions
@@ -317,6 +319,21 @@ class AngelleyeGravityFormsBraintree{
             $display_value = $value;
         }
         return $display_value;
+    }
+
+    /**
+     * Hide save changes button on braintree reports page.
+     *
+     * @param $html
+     * @return mixed|string
+     */
+    public function gform_settings_save_button( $html ) {
+
+        if (!empty($_GET['page']) && esc_html($_GET['page']) === 'gf_settings' && !empty($_GET['subview']) && esc_html($_GET['subview']) === 'braintree-reports') {
+            return '';
+        }
+
+        return $html;
     }
 }
 
