@@ -134,7 +134,7 @@ class AngelleyeGravityFormsBraintreeReports extends GFAddOn {
 
                 $merchant_accounts = [
                     [
-                        'label' => esc_html__( 'Select Merchant Account ID', 'angelleye-gravity-forms-braintree' ),
+                        'label' => esc_html__( 'All', 'angelleye-gravity-forms-braintree' ),
                         'value' => ''
                     ]
                 ];
