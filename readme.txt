@@ -3,8 +3,8 @@ Contributors: angelleye, Plugify, hello@lukerollans.me, gravityplus
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=9CQZZGGMF78VY&source=url
 Tags: gravity form, gravity forms, credit card, credit cards, payment, payments, braintree
 Requires at least: 5.0
-Tested up to: 6.2
-Stable tag: 4.0.7
+Tested up to: 6.4.2
+Stable tag: 5.0.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -64,8 +64,15 @@ In the search field type Gravity Forms Braintree Payments and click Search Plugi
 
 == Changelog ==
 
+= 5.0.0 - 01.22.2024 =
+* Feature - Braintree Merchant Account ID Compatibility for each Braintree payment forms. ([GFB-54](https://github.com/angelleye/gravity-forms-braintree/pull/46))
+* Feature - Add global and form level settings for Extra fees. ([GFB-50](https://github.com/angelleye/gravity-forms-braintree/pull/47))
+* Feature - Collect Extra fees based on Card Type: Debit, Credit or ACH.
+* Feature - Generate and export Braintree transaction reports. ([GFB-56](https://github.com/angelleye/gravity-forms-braintree/pull/48))
+* Check the compatibility with latest WordPress version 6.4.2
+
 = 4.0.7 - 04.18.2023 =
-* Fix - Resolved beaintree payment error while using credit card field. ([GFB-46](https://github.com/angelleye/gravity-forms-braintree/pull/45))
+* Fix - Resolved Braintree payment error while using credit card field. ([GFB-46](https://github.com/angelleye/gravity-forms-braintree/pull/45))
 
 = 4.0.6 - 04.18.2023 =
 * Fix - Adjustments to resolve theme conflict. ([GFB-40](https://github.com/angelleye/gravity-forms-braintree/pull/44))

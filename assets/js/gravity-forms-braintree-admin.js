@@ -73,37 +73,18 @@ jQuery(document).ready(function ($) {
         });
     });
 
-    setTimeout(function() {
-        function manageExtraFeesFields( is_enable = false ) {
-            let extraFeesFields = document.querySelectorAll('input.extra-fees-input');
-            if( undefined !== extraFeesFields && extraFeesFields.length > 0 ) {
-                extraFeesFields.forEach(function ( field ){
-                    if(is_enable) {
-                        field.setAttribute('readonly', 'readonly');
-                    } else {
-                        field.removeAttribute('readonly');
-                    }
-                });
-            }
-        }
-        let disableExtraFee = document.getElementById('disable_extra_fees');
-        if( undefined !== disableExtraFee && null !== disableExtraFee ) {
-            manageExtraFeesFields(disableExtraFee.checked);
-            disableExtraFee.addEventListener('click', function (e) {
-                manageExtraFeesFields(disableExtraFee.checked);
-            });
-        }
-    }, 500);
-
     $('.datepicker').datetimepicker({
         format: 'm/d/Y H:i',
     });
-    
+
     $( document ).on( "click",'.delete-report', function() {
         let fileName = $(this).attr('data-file_name');
         let transactionDir = $(this).attr('data-transaction_dir');
         let ref_id = $(this).attr('data-ref_id');
         if ( confirm(GFBraintreeObj.report_confirm) === true) {
+
+            remove_gfb_notification();
+
             jQuery.post(ajaxurl, {
                 action: 'angelleye_gform_braintree_report_delete',
                 file_name: fileName,
@@ -113,8 +94,12 @@ jQuery(document).ready(function ($) {
                 if( response.status ) {
                     $('.transactions-report-lists  .'+ref_id).remove();
                 } else {
-                 alert(response.message);
+                    alert(response.message);
                 }
+            }).fail(function(error){
+                let status = error.status;
+                let message =  ( status ===  504 ) ? status+' Gateway Time-out '+error.statusText : status+' '+error.statusText;
+                add_gfb_notification( message, 'error' );
             });
         }
     });
@@ -152,6 +137,11 @@ jQuery(document).ready(function ($) {
                 }
 
                 currentObj.removeClass('loader');
+            }).fail(function(error){
+                let status = error.status;
+                let message =  ( status ===  504 ) ? status+' Gateway Time-out '+error.statusText : status+' '+error.statusText;
+                add_gfb_notification( message, 'error' );
+                currentObj.removeClass('loader');
             });
         } else {
 
@@ -173,7 +163,30 @@ jQuery(document).ready(function ($) {
 function remove_gfb_notification() {
     jQuery('.notifications .notification').remove();
 }
+
 function add_gfb_notification( message, type= 'success' ) {
     remove_gfb_notification();
     jQuery('.notifications').append('<p class="notification '+type+'">'+message+'</p>');
 }
+
+setTimeout(function() {
+    function manageExtraFeesFields( is_enable = false ) {
+        let extraFeesFields = document.querySelectorAll('input.extra-fees-input');
+        if( undefined !== extraFeesFields && extraFeesFields.length > 0 ) {
+            extraFeesFields.forEach(function ( field ){
+                if(is_enable) {
+                    field.setAttribute('readonly', 'readonly');
+                } else {
+                    field.removeAttribute('readonly');
+                }
+            });
+        }
+    }
+    let disableExtraFee = document.getElementById('disable_extra_fees');
+    if( undefined !== disableExtraFee && null !== disableExtraFee ) {
+        manageExtraFeesFields(disableExtraFee.checked);
+        disableExtraFee.addEventListener('click', function (e) {
+            manageExtraFeesFields(disableExtraFee.checked);
+        });
+    }
+}, 500);

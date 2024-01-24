@@ -4,7 +4,7 @@
 
 final class Plugify_GForm_Braintree extends GFPaymentAddOn {
 
-    protected $_version = '4.0.7';
+    protected $_version = '5.0.0';
     protected $_min_gravityforms_version = '1.8.7.16';
     protected $_slug = 'gravity-forms-braintree';
     protected $_path = 'gravity-forms-braintree/lib/class.plugify-gform-braintree.php';
@@ -733,21 +733,6 @@ final class Plugify_GForm_Braintree extends GFPaymentAddOn {
 
             $temp_settings = [];
 
-            $merchant_settings = [
-                'title'      => esc_html__( 'Merchant Account Settings', 'angelleye-gravity-forms-braintree' ),
-                'fields' => [
-                    [
-                        'name'          => 'sub_merchant_account_id',
-                        'label'         => esc_html__( 'Merchant Account ID', 'angelleye-gravity-forms-braintree' ),
-                        'type'          => 'select',
-                        'choices'       => $this->merchant_account_choices(),
-                        'required'      => false,
-                        'default_value' => '',
-                        'tooltip'       => __( 'By default the payment will be processed by your primary Braintree merchant account.  If you have multiple merchant accounts configured, you can specify which one this form should pay to here.' ),
-                    ]
-                ],
-            ];
-
             $extra_fee_settings = [
                 'title'      => esc_html__( 'Extra Fee Settings (%)', 'angelleye-gravity-forms-braintree' ),
                 'fields' => [
@@ -861,6 +846,20 @@ final class Plugify_GForm_Braintree extends GFPaymentAddOn {
                 ],
             ];
 
+            $merchant_settings = [
+                'title'      => esc_html__( 'Merchant Account Settings', 'angelleye-gravity-forms-braintree' ),
+                'fields' => [
+                    [
+                        'name'          => 'sub_merchant_account_id',
+                        'label'         => esc_html__( 'Merchant Account ID', 'angelleye-gravity-forms-braintree' ),
+                        'type'          => 'select',
+                        'choices'       => $this->merchant_account_choices(),
+                        'required'      => false,
+                        'default_value' => '',
+                        'tooltip'       => esc_html__('By default the payment will be processed by your primary Braintree merchant account.  If you have multiple merchant accounts configured, you can specify which one this form should pay to here.', 'angelleye-gravity-forms-braintree'),
+                    ]
+                ]
+            ];
             foreach ( $settings as $setting ) {
 
                 if( !empty( $setting ) && $setting['title'] === 'Other Settings' ) {

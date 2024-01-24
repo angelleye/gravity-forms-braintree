@@ -38,7 +38,7 @@ class AngelleyeGravityFormsBraintreeReports extends GFAddOn {
     /**
      * Class constructor for manage hooks and filter.
      */
-    protected function __construct() {
+    public function __construct() {
         parent::__construct();
 
         $this->_url = GRAVITY_FORMS_BRAINTREE_ASSET_URL;

@@ -69,51 +69,59 @@ if ( ! class_exists( 'Angelleye_Gravity_Braintree_CreditCard_Field' ) ) {
          */
         public function get_field_input( $form, $value = '', $entry = null ) {
 
-            $is_entry_detail = $this->is_entry_detail();
-            $is_form_editor  = $this->is_form_editor();
+            try {
 
-            $form_id  = $form['id'];
-            $id       = intval( $this->id );
-            $field_id = $is_entry_detail || $is_form_editor || $form_id == 0 ? "input_$id" : 'input_' . $form_id . "_$id";
-            $form_id  = ( $is_entry_detail || $is_form_editor ) && empty( $form_id ) ? rgget( 'id' ) : $form_id;
+                $is_entry_detail = $this->is_entry_detail();
+                $is_form_editor  = $this->is_form_editor();
 
-            $inputs = !empty( $this->inputs ) ? $this->inputs : '';
-            $input_field_id = !empty( $inputs[0]['id'] ) ? $inputs[0]['id'] : $id;
+                $form_id  = $form['id'];
+                $id       = intval( $this->id );
+                $field_id = $is_entry_detail || $is_form_editor || $form_id == 0 ? "input_$id" : 'input_' . $form_id . "_$id";
+                $form_id  = ( $is_entry_detail || $is_form_editor ) && empty( $form_id ) ? rgget( 'id' ) : $form_id;
 
-            $Plugify_GForm_Braintree = new Plugify_GForm_Braintree();
-            $gateway                 = $Plugify_GForm_Braintree->getBraintreeGateway();
-            $clientToken             = $gateway->clientToken()->generate();
+                $inputs = !empty( $this->inputs ) ? $this->inputs : '';
+                $input_field_id = !empty( $inputs[0]['id'] ) ? $inputs[0]['id'] : $id;
 
-            ob_start();
+                $Plugify_GForm_Braintree = new Plugify_GForm_Braintree();
+                $gateway                 = $Plugify_GForm_Braintree->getBraintreeGateway();
+                $clientToken             = $gateway->clientToken()->generate();
 
-            $extra_fees = angelleye_get_extra_fees( $form_id );
+                $extra_fees = angelleye_get_extra_fees( $form_id );
 
-            $dropin_container_id = uniqid("{$form_id}_");
-            $gfb_obj = [
-                'ajax_url' => admin_url( 'admin-ajax.php' ),
-                'form_id' => (int)$form_id,
-                'is_fees_enable' => !empty( $extra_fees['is_fees_enable'] ) ? $extra_fees['is_fees_enable'] : false,
-                'card_type' => $this->type,
-                'is_admin' => is_admin(),
-                'client_token' => $clientToken,
-                'container_id' => $dropin_container_id,
-                'nonce' => wp_create_nonce('preview-payment-nonce'),
-            ];
+                $dropin_container_id = uniqid("{$form_id}_");
+                $gfb_obj = [
+                    'ajax_url' => admin_url( 'admin-ajax.php' ),
+                    'form_id' => (int)$form_id,
+                    'is_fees_enable' => !empty( $extra_fees['is_fees_enable'] ) ? $extra_fees['is_fees_enable'] : false,
+                    'card_type' => $this->type,
+                    'is_admin' => is_admin(),
+                    'client_token' => $clientToken,
+                    'container_id' => $dropin_container_id,
+                    'nonce' => wp_create_nonce('preview-payment-nonce'),
+                ];
 
-			?>
-            <div class='ginput_container gform_payment_method_options ginput_container_<?php echo $this->type; ?>'
-                 id='<?php echo $field_id; ?>'>
-                <div id="dropin-container_<?php echo $dropin_container_id; ?>"></div>
-                <input type="hidden" id="nonce_<?php echo $form_id; ?>" name="payment_method_nonce"/>
-                <input type="hidden" id="payment_card_type_<?php echo $form_id; ?>" name="payment_card_type"/>
-                <input type="hidden" id="payment_card_details_<?php echo $form_id; ?>" name="input_<?php echo $input_field_id; ?>"/>
-            </div>
-            <script type="text/javascript">
-                initBraintreeDropIn('<?php echo $form_id; ?>', <?php echo json_encode($gfb_obj); ?>);
-            </script>
-            <?php
-            $html = ob_get_contents();
-            ob_get_clean();
+                ob_start();
+                ?>
+                <div class='ginput_container gform_payment_method_options ginput_container_<?php echo $this->type; ?>'
+                     id='<?php echo $field_id; ?>'>
+                    <div id="dropin-container_<?php echo $dropin_container_id; ?>"></div>
+                    <input type="hidden" id="nonce_<?php echo $form_id; ?>" name="payment_method_nonce"/>
+                    <input type="hidden" id="payment_card_type_<?php echo $form_id; ?>" name="payment_card_type"/>
+                    <input type="hidden" id="payment_card_details_<?php echo $form_id; ?>" name="input_<?php echo $input_field_id; ?>"/>
+                </div>
+                <script type="text/javascript">
+                    jQuery( document ).ready(function() {
+                        initBraintreeDropIn('<?php echo $form_id; ?>', <?php echo json_encode($gfb_obj); ?>);
+                    });
+                </script>
+                <?php
+                $html = ob_get_contents();
+                ob_get_clean();
+
+            } catch (Exception $e) {
+
+                return sprintf( esc_html__("Something went wrong. Please check merchant account details %s.", "angelleye-gravity-forms-braintree"), '<a href="'.esc_url( admin_url( 'admin.php?page=gf_settings&subview=gravity-forms-braintree' ) ).'">'.esc_html__('here', 'angelleye-gravity-forms-braintree').'</a>');
+            }
 
             return $html;
         }

@@ -527,11 +527,11 @@ function loadBraintreeDropIn( form_id, args = [] ) {
     if( undefined !== dropInContainer ) {
         currentForm = dropInContainer[0]?.form;
         if( typeof  currentForm == 'undefined' ) {
-            currentForm = dropInContainer[0]?.offsetParent;
+            currentForm = document.getElementById('gform_'+args.form_id);
         }
     }
 
-    var paymentMethodOptions = ( undefined !== currentForm && '' !== currentForm ) ?  currentForm.querySelectorAll('.gform_payment_method_toggle_options input[type=radio]') : [];
+    var paymentMethodOptions = ( undefined !== currentForm && '' !== currentForm && null !== currentForm ) ?  currentForm?.querySelectorAll('.gform_payment_method_toggle_options input[type=radio]') : [];
 
     braintree.dropin.create({
         authorization: args.client_token,
