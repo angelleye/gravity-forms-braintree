@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_i
 Tags: gravity form, gravity forms, credit card, credit cards, payment, payments, braintree
 Requires at least: 5.0
 Tested up to: 6.4.2
-Stable tag: 5.0.0
+Stable tag: 5.0.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -63,6 +63,9 @@ In the search field type Gravity Forms Braintree Payments and click Search Plugi
 4. List of active feeds on the current form.
 
 == Changelog ==
+
+= 5.0.1 - 01.24.2024 =
+* Fix - Minor bug fixes
 
 = 5.0.0 - 01.22.2024 =
 * Feature - Braintree Merchant Account ID Compatibility for each Braintree payment forms. ([GFB-54](https://github.com/angelleye/gravity-forms-braintree/pull/46))

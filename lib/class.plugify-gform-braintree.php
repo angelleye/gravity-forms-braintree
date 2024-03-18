@@ -4,7 +4,7 @@
 
 final class Plugify_GForm_Braintree extends GFPaymentAddOn {
 
-    protected $_version = '5.0.0';
+    protected $_version = '5.0.1';
     protected $_min_gravityforms_version = '1.8.7.16';
     protected $_slug = 'gravity-forms-braintree';
     protected $_path = 'gravity-forms-braintree/lib/class.plugify-gform-braintree.php';

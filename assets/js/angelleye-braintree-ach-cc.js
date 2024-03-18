@@ -485,7 +485,7 @@ function displayPaymentPreview( payload, form_id, args = [] ) {
 
         let binDataDebit = payload?.binData?.debit;
         let paymentCardType = payload.type;
-        if( binDataDebit.toLowerCase() === 'yes' || binDataDebit === true) {
+        if( undefined !== binDataDebit && binDataDebit.toLowerCase() === 'yes' || binDataDebit === true) {
             paymentCardType = 'DebitCard';
         }
 
@@ -535,7 +535,10 @@ function loadBraintreeDropIn( form_id, args = [] ) {
 
     braintree.dropin.create({
         authorization: args.client_token,
-        container: '#dropin-container_'+args.container_id
+        container: '#dropin-container_'+args.container_id,
+        paypal: {
+            flow: 'vault',
+        },
     }, (error, dropinInstance) => {
         if (error) console.error(error);
 
@@ -565,16 +568,19 @@ function loadBraintreeDropIn( form_id, args = [] ) {
                         let currentGform = document.getElementById(gformBCCEle);
                         loaderEl = currentGform?.querySelector('.gform_footer #gform_submit_button_'+form_id);
                     }
+
                     enableGformLoader(loaderEl);
                     dropinInstance.requestPaymentMethod((error, payload) => {
+
                         if (error) {
                             console.error(error);
                             removeGformLoader(form_id);
                         } else {
                             document.getElementById('nonce_'+form_id).value = payload.nonce;
                             let binDataDebit = payload?.binData?.debit;
+
                             let paymentCardType = payload.type;
-                            if( binDataDebit.toLowerCase() === 'yes' || binDataDebit === true) {
+                            if( undefined !== binDataDebit && binDataDebit.toLowerCase() === 'yes' || binDataDebit === true) {
                                 paymentCardType = 'DebitCard';
                             }
                             document.getElementById('payment_card_type_'+form_id).value = paymentCardType;

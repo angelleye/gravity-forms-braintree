@@ -20,23 +20,37 @@ if ( ! class_exists( 'Angelleye_Gravity_Braintree_CreditCard_Field' ) ) {
          */
         public $type = 'braintree_credit_card';
 
-        /**
-         * Return the field title, for use in the form editor.
-         *
-         * @return string|void
-         */
-        public function get_form_editor_field_title() {
-            return __( 'Braintree Credit Card', 'angelleye-gravity-forms-braintree' );
+        public function get_braintree_payment_methods(){
+
+            return [
+                'paypal' => __('PayPal', 'angelleye-gravity-forms-braintree'),
+                'venmo' => __('Venmo', 'angelleye-gravity-forms-braintree'),
+                'apple_pay' => __('Apple Pay', 'angelleye-gravity-forms-braintree'),
+                'google_pay' => __('Google Pay', 'angelleye-gravity-forms-braintree'),
+            ];
         }
 
-        /**
-         * Assign the field button to the Pricing Fields group.
-         *
-         * @return array
-         */
-        public function get_form_editor_button() {
-            return [ 'group' => 'pricing_fields', 'text' => 'Braintree CC' ];
-        }
+		/**
+		 * Return the field title, for use in the form editor.
+		 *
+		 * @return string|void
+		 */
+		public function get_form_editor_field_title() {
+			return __( 'Braintree Credit Card', 'angelleye-gravity-forms-braintree' );
+		}
+
+		public function get_form_editor_field_description() {
+			return sprintf( esc_attr__( 'Add a %s field to your form. Enable %s Payment method in your form. Default is Braintree Credit Card', 'angelleye-gravity-forms-braintree' ), $this->get_form_editor_field_title(), implode(', ', $this->get_braintree_payment_methods()) );
+		}
+
+		/**
+		 * Assign the field button to the Pricing Fields group.
+		 *
+		 * @return array
+		 */
+		public function get_form_editor_button() {
+			return [ 'group' => 'pricing_fields', 'text' => 'Braintree CC' ];
+		}
 
         /**
          * The settings which should be available on the field in the form editor.
