@@ -531,15 +531,57 @@ function loadBraintreeDropIn( form_id, args = [] ) {
         }
     }
 
+    var paymentMethods = args?.payment_methods;
     var paymentMethodOptions = ( undefined !== currentForm && '' !== currentForm && null !== currentForm ) ?  currentForm?.querySelectorAll('.gform_payment_method_toggle_options input[type=radio]') : [];
 
-    braintree.dropin.create({
+    var dropInArgs = {
         authorization: args.client_token,
-        container: '#dropin-container_'+args.container_id,
-        paypal: {
+        container: '#dropin-container_' + args.container_id,
+    };
+
+    if (undefined !== paymentMethods && undefined !== paymentMethods.paypal && 1 === parseInt(paymentMethods.paypal)) {
+        dropInArgs.paypal = {
             flow: 'vault',
-        },
-    }, (error, dropinInstance) => {
+        };
+    }
+
+    if (undefined !== paymentMethods && undefined !== paymentMethods.venmo && 1 === parseInt(paymentMethods.venmo)) {
+        dropInArgs.venmo = {
+            allowDesktop: true,
+            allowDesktopWebLogin: true,
+            mobileWebFallBack: true,
+            paymentMethodUsage: 'multi_use',
+        };
+    }
+
+    if (undefined !== paymentMethods && undefined !== paymentMethods.google_pay && 1 === parseInt(paymentMethods.google_pay)) {
+        /*dropInArgs.googlePay = {
+            googlePayVersion: 2,
+            transactionInfo: {
+                totalPriceStatus: 'FINAL',
+                totalPrice: '123.45',
+                currencyCode: 'USD'
+            },
+            allowedPaymentMethods: [{
+                type: 'CARD',
+            }]
+        };*/
+    }
+
+    if (undefined !== paymentMethods && undefined !== paymentMethods.apple_pay && 1 === parseInt(paymentMethods.apple_pay)) {
+        /*dropInArgs.applePay = {
+            displayName: 'Nirmal Desai',
+            paymentRequest: {
+                total: {
+                    label: 'Test',
+                    amount: '123.45' // Replace with dynamic amount if necessary
+                },
+                requiredBillingContactFields: ['postalAddress']
+            }
+        };*/
+    }
+
+    braintree.dropin.create( dropInArgs , (error, dropinInstance) => {
         if (error) console.error(error);
 
         let gformBCCEle = 'gform_'+form_id;

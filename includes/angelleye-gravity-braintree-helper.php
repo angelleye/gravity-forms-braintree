@@ -407,3 +407,50 @@ function get_product_field_filter( $product_field ) {
 
     return !empty( $product_field ) ? str_replace('.', '_', $product_field ) : '';
 }
+
+/**
+ * Get Payment methods for enable in braintree drop-in method.
+ *
+ * @return array
+ */
+function get_braintree_payment_methods()  {
+
+	return [
+		'paypal' => __('PayPal', 'angelleye-gravity-forms-braintree'),
+		'venmo' => __('Venmo', 'angelleye-gravity-forms-braintree'),
+		'apple_pay' => __('Apple Pay', 'angelleye-gravity-forms-braintree'),
+		'google_pay' => __('Google Pay', 'angelleye-gravity-forms-braintree'),
+	];
+}
+
+function angelleye_get_payment_methods( $form_id ) {
+
+	if( empty( $form_id ) ) {
+		return [];
+	}
+
+	try {
+
+		$form = GFAPI::get_form( $form_id );
+		$gform_braintree = new Plugify_GForm_Braintree();
+		$payment_feed = $gform_braintree->get_payment_feed([], $form);
+		$feed_meta = !empty( $payment_feed['meta'] ) ? $payment_feed['meta'] : '';
+
+		$payment_method_lists = get_braintree_payment_methods();
+
+		$available_payment_methods = [];
+        if( !empty( $payment_method_lists ) && is_array( $payment_method_lists ) ) {
+
+            foreach ( $payment_method_lists as $key => $payment_method_list ) {
+
+	            $available_payment_methods[$key] =  !empty( $feed_meta[$key] ) ? $feed_meta[$key] : '';
+            }
+        }
+
+	} catch ( Exception $e ) {
+
+        return [];
+    }
+
+    return $available_payment_methods;
+}

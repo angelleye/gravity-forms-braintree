@@ -860,11 +860,28 @@ final class Plugify_GForm_Braintree extends GFPaymentAddOn {
                     ]
                 ]
             ];
+
+			$payment_methods_settings = [
+				'title'      => esc_html__( 'Payment Method Settings', 'angelleye-gravity-forms-braintree' ),
+				'fields' => [
+					[
+						'name'          => 'braintree_payment_methods',
+						'label'         => esc_html__( 'Payment Methods', 'angelleye-gravity-forms-braintree' ),
+						'type'          => 'checkbox',
+						'choices'       => $this->get_payment_method_choices(),
+						'required'      => false,
+						'default_value' => '',
+						'tooltip'       => esc_html__('By default the Braintree Credit Card payment method in your form. Enable multiple payment methods.', 'angelleye-gravity-forms-braintree'),
+					]
+				]
+			];
+
             foreach ( $settings as $setting ) {
 
                 if( !empty( $setting ) && $setting['title'] === 'Other Settings' ) {
                     $temp_settings[] = $merchant_settings;
                     $temp_settings[] = $extra_fee_settings;
+                    $temp_settings[] = $payment_methods_settings;
                 }
 
                 $temp_settings[] = $setting;
@@ -1465,4 +1482,23 @@ final class Plugify_GForm_Braintree extends GFPaymentAddOn {
 
         return $merchant_accounts;
     }
+
+	public function get_payment_method_choices() {
+
+		$payment_methods = [];
+
+		$get_payment_methods = get_braintree_payment_methods();
+
+		if( !empty( $get_payment_methods ) && is_array( $get_payment_methods ) ) {
+
+			foreach (  $get_payment_methods as $key =>  $get_payment_method )  {
+				$payment_methods[] = [
+					'label' => $get_payment_method,
+					'name' => $key
+				];
+			}
+		}
+
+		return $payment_methods;
+	}
 }
