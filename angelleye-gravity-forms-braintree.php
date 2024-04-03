@@ -70,7 +70,7 @@ class AngelleyeGravityFormsBraintree{
 
     public function enqueue_scripts() {
         wp_enqueue_style('gravity-forms-braintree', GRAVITY_FORMS_BRAINTREE_ASSET_URL . 'assets/css/gravity-forms-braintree-public.css');
-	    wp_register_script('braintreegateway-dropin', "https://js.braintreegateway.com/web/dropin/1.26.0/js/dropin.min.js");
+	    wp_register_script('braintreegateway-dropin', "https://js.braintreegateway.com/web/dropin/1.42.0/js/dropin.min.js");
 	    wp_enqueue_script('braintreegateway-dropin');
     }
 

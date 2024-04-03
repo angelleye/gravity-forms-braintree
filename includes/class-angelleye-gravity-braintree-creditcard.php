@@ -93,6 +93,24 @@ if ( ! class_exists( 'Angelleye_Gravity_Braintree_CreditCard_Field' ) ) {
                 $extra_fees = angelleye_get_extra_fees( $form_id );
 
                 $dropin_container_id = uniqid("{$form_id}_");
+
+	            $fields = get_product_fields_by_form_id($form_id);
+
+                $pricing_fields = [
+                    'is_form_total' => false,
+                    'currencyCode' => 'USD'
+                ];
+                if( !empty( $fields ) && is_array( $fields ) ) {
+
+                    $products = !empty( $fields['products'] ) ? $fields['products'] : '';
+	                $pricing_fields['form_products_fields'] = $products;
+                    if( !empty( $fields['total'] ) && is_array( $fields['total'] ) ) {
+	                    $pricing_fields['is_form_total'] = true;
+	                    $pricing_fields['total_input_id'] = !empty( $fields['total']['input_id'] ) ? $fields['total']['input_id'] : '';
+	                    $pricing_fields['default_product_label'] = __( 'Product Name', 'angelleye-gravity-forms-braintree' );
+                    }
+                }
+
                 $gfb_obj = [
                     'ajax_url' => admin_url( 'admin-ajax.php' ),
                     'form_id' => (int)$form_id,
@@ -102,7 +120,8 @@ if ( ! class_exists( 'Angelleye_Gravity_Braintree_CreditCard_Field' ) ) {
                     'client_token' => $clientToken,
                     'container_id' => $dropin_container_id,
                     'nonce' => wp_create_nonce('preview-payment-nonce'),
-                    'payment_methods'  => angelleye_get_payment_methods($form_id)
+                    'payment_methods'  => angelleye_get_payment_methods($form_id),
+                    'pricing_fields' => $pricing_fields,
                 ];
 
                 ob_start();
@@ -117,6 +136,23 @@ if ( ! class_exists( 'Angelleye_Gravity_Braintree_CreditCard_Field' ) ) {
                 <script type="text/javascript">
                     jQuery( document ).ready(function() {
                         initBraintreeDropIn('<?php echo $form_id; ?>', <?php echo json_encode($gfb_obj); ?>);
+
+                        jQuery(document).on('keyup change', '#gform_<?php echo $form_id; ?> input', function(){
+                            jQuery('#dropin-container_<?php echo $dropin_container_id; ?>').html('');
+                            braintreeDropInReinitialize();
+                        });
+
+                        jQuery(document).on('change', '#gform_<?php echo $form_id; ?> select', function(){
+                            jQuery('#dropin-container_<?php echo $dropin_container_id; ?>').html('');
+                            braintreeDropInReinitialize();
+                        });
+
+                        function braintreeDropInReinitialize() {
+                            var braintreeDropInTimeOut = setTimeout(function () {
+                                initBraintreeDropIn('<?php echo $form_id; ?>', <?php echo json_encode($gfb_obj); ?>);
+                                clearTimeout(braintreeDropInTimeOut);
+                            }, 1000);
+                        }
                     });
                 </script>
                 <?php

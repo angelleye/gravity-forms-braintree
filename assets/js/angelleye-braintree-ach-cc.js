@@ -554,31 +554,66 @@ function loadBraintreeDropIn( form_id, args = [] ) {
         };
     }
 
+    var pricingFields = args.pricing_fields;
+    var formTotalAmount = 0.00;
+    var formTotalLabel = pricingFields.default_product_label? pricingFields.default_product_label : "Cart Total";
+    if( pricingFields.is_form_total ) {
+        var carTotalAmount = jQuery('input[name="'+pricingFields.total_input_id+'"]').val();
+        formTotalAmount = braintreePriceWithoutCode(carTotalAmount);
+    } else {
+
+        var products = pricingFields.form_products_fields;
+
+        jQuery.each( products, function( key, value ) {
+            var tempPrice = 0.00;
+            var productAmount = 0.00;
+            if( value.type === 'select' ) {
+                productAmount=  jQuery('select[name="'+value.price_id+'"]').val();
+                tempPrice = braintreePriceWithoutCode(productAmount);
+            } else {
+                productAmount =  jQuery('input[name="'+value.price_id+'"]').val();
+                if( value.quantity_id ) {
+                    var productQty = jQuery('input[name="' + value.quantity_id + '"]').val();
+                    if( undefined !== productQty && null !== productQty && '' !== productQty && productQty > 0 ) {
+                        productQty = parseInt(productQty);
+                        tempPrice = braintreePriceWithoutCode(productAmount);
+                        tempPrice = tempPrice * productQty;
+                    }
+                } else {
+                    tempPrice = braintreePriceWithoutCode(productAmount);
+                }
+            }
+
+            formTotalAmount = parseFloat(formTotalAmount)+parseFloat(tempPrice);
+        });
+    }
+
     if (undefined !== paymentMethods && undefined !== paymentMethods.google_pay && 1 === parseInt(paymentMethods.google_pay)) {
-        /*dropInArgs.googlePay = {
-            googlePayVersion: 2,
-            transactionInfo: {
-                totalPriceStatus: 'FINAL',
-                totalPrice: '123.45',
-                currencyCode: 'USD'
-            },
-            allowedPaymentMethods: [{
-                type: 'CARD',
-            }]
-        };*/
+
+        if( formTotalAmount > 0 ) {
+            dropInArgs.googlePay = {
+                "googlePayVersion": 2,
+                "transactionInfo": {
+                    "currencyCode": pricingFields.currencyCode,
+                    "totalPriceStatus": "ESTIMATED",
+                    "totalPrice": braintreePriceFormatter(formTotalAmount)
+                }
+            }
+        }
     }
 
     if (undefined !== paymentMethods && undefined !== paymentMethods.apple_pay && 1 === parseInt(paymentMethods.apple_pay)) {
-        /*dropInArgs.applePay = {
-            displayName: 'Nirmal Desai',
-            paymentRequest: {
-                total: {
-                    label: 'Test',
-                    amount: '123.45' // Replace with dynamic amount if necessary
-                },
-                requiredBillingContactFields: ['postalAddress']
-            }
-        };*/
+
+        if( formTotalAmount > 0 ) {
+            dropInArgs.applePay = {
+                paymentRequest: {
+                    total: {
+                        label: formTotalLabel,
+                        amount: braintreePriceFormatter(formTotalAmount)
+                    },
+                }
+            };
+        }
     }
 
     braintree.dropin.create( dropInArgs , (error, dropinInstance) => {
@@ -657,18 +692,23 @@ function initBraintreeDropIn( form_id, args = [] ) {
         }
     }
 
-    if(typeof braintree === 'undefined' || typeof braintree.dropin === 'undefined' ) {
+    var braintreeDropInTimeOut = setTimeout(function () {
 
-        var script = document.createElement('script');
-        script.onload = function () {
-            // console.log("Braintree is now loaded.");
+        if(typeof braintree === 'undefined' || typeof braintree.dropin === 'undefined' ) {
+
+            var script = document.createElement('script');
+            script.onload = function () {
+                // console.log("Braintree is now loaded.");
+                loadBraintreeDropIn( form_id, args );
+            };
+            script.src = 'https://js.braintreegateway.com/web/dropin/1.42.0/js/dropin.min.js';
+            document.head.appendChild(script);
+        } else {
             loadBraintreeDropIn( form_id, args );
-        };
-        script.src = 'https://js.braintreegateway.com/web/dropin/1.26.0/js/dropin.min.js';
-        document.head.appendChild(script);
-    } else {
-        loadBraintreeDropIn( form_id, args );
-    }
+        }
+
+        clearTimeout(braintreeDropInTimeOut);
+    }, 500);
 }
 
 function enableGformLoader( element ) {
@@ -683,4 +723,26 @@ function removeGformLoader(form_id) {
             loader.remove();
         });
     }
+}
+
+function braintreePriceWithoutCode( amount ) {
+
+    if( amount.indexOf('|') !== -1) {
+        var tempAmount = amount.split('|');
+        if( undefined !== tempAmount && tempAmount) {
+            amount = tempAmount[tempAmount.length - 1];
+        }
+    }
+
+    if( undefined !== amount && '' !== amount && null !== amount ) {
+        var regex = new RegExp(/[^0-9.]/);
+        return amount.replace(regex, '');
+    }
+
+    return 0.00;
+}
+
+function braintreePriceFormatter( price ) {
+    var price = parseFloat(price);
+    return  price.toFixed(2);
 }
