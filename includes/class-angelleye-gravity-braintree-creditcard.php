@@ -121,6 +121,7 @@ if ( ! class_exists( 'Angelleye_Gravity_Braintree_CreditCard_Field' ) ) {
                     'container_id' => $dropin_container_id,
                     'nonce' => wp_create_nonce('preview-payment-nonce'),
                     'payment_methods'  => angelleye_get_payment_methods($form_id),
+                    'google_pay_merchant_id'  => angelleye_get_google_pay_merchant_id($form_id),
                     'pricing_fields' => $pricing_fields,
                 ];
 
@@ -137,12 +138,9 @@ if ( ! class_exists( 'Angelleye_Gravity_Braintree_CreditCard_Field' ) ) {
                     jQuery( document ).ready(function() {
                         initBraintreeDropIn('<?php echo $form_id; ?>', <?php echo json_encode($gfb_obj); ?>);
 
-                        jQuery(document).on('keyup change', '#gform_<?php echo $form_id; ?> input', function(){
-                            jQuery('#dropin-container_<?php echo $dropin_container_id; ?>').html('');
-                            braintreeDropInReinitialize();
-                        });
-
-                        jQuery(document).on('change', '#gform_<?php echo $form_id; ?> select', function(){
+                        jQuery(document).on('change', '#gform_<?php echo $form_id; ?> input, #gform_<?php echo $form_id; ?> select', function(){
+                            var Gform = jQuery('#gform_<?php echo $form_id; ?>');
+                            braintreeDropInAddLoader(Gform);
                             jQuery('#dropin-container_<?php echo $dropin_container_id; ?>').html('');
                             braintreeDropInReinitialize();
                         });
@@ -151,7 +149,17 @@ if ( ! class_exists( 'Angelleye_Gravity_Braintree_CreditCard_Field' ) ) {
                             var braintreeDropInTimeOut = setTimeout(function () {
                                 initBraintreeDropIn('<?php echo $form_id; ?>', <?php echo json_encode($gfb_obj); ?>);
                                 clearTimeout(braintreeDropInTimeOut);
-                            }, 1000);
+                                braintreeDropInRemoveLoader();
+                            }, 500);
+                        }
+
+                        function braintreeDropInAddLoader( loaderObj ) {
+                            braintreeDropInRemoveLoader();
+                            loaderObj.append('<div class="loader-wrap"></div>')
+                        }
+
+                        function braintreeDropInRemoveLoader() {
+                            jQuery('.loader-wrap').remove();
                         }
                     });
                 </script>

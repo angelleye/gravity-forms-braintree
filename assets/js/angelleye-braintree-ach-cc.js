@@ -593,6 +593,7 @@ function loadBraintreeDropIn( form_id, args = [] ) {
         if( formTotalAmount > 0 ) {
             dropInArgs.googlePay = {
                 "googlePayVersion": 2,
+                merchantId: args.google_pay_merchant_id,
                 "transactionInfo": {
                     "currencyCode": pricingFields.currencyCode,
                     "totalPriceStatus": "ESTIMATED",
@@ -615,7 +616,7 @@ function loadBraintreeDropIn( form_id, args = [] ) {
             };
         }
     }
-
+    
     braintree.dropin.create( dropInArgs , (error, dropinInstance) => {
         if (error) console.error(error);
 

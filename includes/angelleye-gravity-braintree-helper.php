@@ -454,3 +454,26 @@ function angelleye_get_payment_methods( $form_id ) {
 
     return $available_payment_methods;
 }
+
+function angelleye_get_google_pay_merchant_id( $form_id ) {
+
+	if( empty( $form_id ) ) {
+		return [];
+	}
+
+	try {
+
+		$form = GFAPI::get_form( $form_id );
+		$gform_braintree = new Plugify_GForm_Braintree();
+		$payment_feed = $gform_braintree->get_payment_feed([], $form);
+		$feed_meta = !empty( $payment_feed['meta'] ) ? $payment_feed['meta'] : '';
+
+		$merchant_id = !empty( $feed_meta['google_pay_merchant_id'] ) ? $feed_meta['google_pay_merchant_id'] : '';
+
+	} catch ( Exception $e ) {
+
+		return [];
+	}
+
+	return $merchant_id;
+}
