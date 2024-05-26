@@ -821,6 +821,86 @@ final class Plugify_GForm_Braintree extends GFPaymentAddOn {
                             ],
                         ],
                     ],
+	                [
+		                'name'          => 'paypal_fees',
+		                'type'          => 'text',
+		                'input_type'    => 'number',
+		                'label'         => esc_html__( 'PayPal', 'angelleye-gravity-forms-braintree' ),
+		                'tooltip'       => '',
+		                'required'      => false,
+		                'default_value' => '0.00',
+		                'placeholder'   => '0.00',
+		                'min'           => '0',
+		                'class'         => 'extra-fees-input',
+		                'dependency'    => [
+			                'live'      => true,
+			                'fields'    => [
+				                [
+					                'field' => 'override_extra_fees',
+				                ]
+			                ],
+		                ],
+	                ],
+	                [
+		                'name'          => 'venmo_fees',
+		                'type'          => 'text',
+		                'input_type'    => 'number',
+		                'label'         => esc_html__( 'Venmo', 'angelleye-gravity-forms-braintree' ),
+		                'tooltip'       => '',
+		                'required'      => false,
+		                'default_value' => '0.00',
+		                'placeholder'   => '0.00',
+		                'min'           => '0',
+		                'class'         => 'extra-fees-input',
+		                'dependency'    => [
+			                'live'      => true,
+			                'fields'    => [
+				                [
+					                'field' => 'override_extra_fees',
+				                ]
+			                ],
+		                ],
+	                ],
+	                /*[
+		                'name'          => 'google_pay_fees',
+		                'type'          => 'text',
+		                'input_type'    => 'number',
+		                'label'         => esc_html__( 'Google Pay', 'angelleye-gravity-forms-braintree' ),
+		                'tooltip'       => '',
+		                'required'      => false,
+		                'default_value' => '0.00',
+		                'placeholder'   => '0.00',
+		                'min'           => '0',
+		                'class'         => 'extra-fees-input',
+		                'dependency'    => [
+			                'live'      => true,
+			                'fields'    => [
+				                [
+					                'field' => 'override_extra_fees',
+				                ]
+			                ],
+		                ],
+	                ],
+	                [
+		                'name'          => 'apple_pay_fees',
+		                'type'          => 'text',
+		                'input_type'    => 'number',
+		                'label'         => esc_html__( 'Apple Pay', 'angelleye-gravity-forms-braintree' ),
+		                'tooltip'       => '',
+		                'required'      => false,
+		                'default_value' => '0.00',
+		                'placeholder'   => '0.00',
+		                'min'           => '0',
+		                'class'         => 'extra-fees-input',
+		                'dependency'    => [
+			                'live'      => true,
+			                'fields'    => [
+				                [
+					                'field' => 'override_extra_fees',
+				                ]
+			                ],
+		                ],
+	                ],*/
                     [
                         'name'          => 'disable_extra_fees',
                         'type'          => 'checkbox',
@@ -1139,6 +1219,86 @@ final class Plugify_GForm_Braintree extends GFPaymentAddOn {
                             ),
                         ),
                     ),
+	                array(
+		                'name'          => 'paypal_fees',
+		                'type'          => 'text',
+		                'input_type'    => 'number',
+		                'label'         => esc_html__( 'PayPal', 'angelleye-gravity-forms-braintree' ),
+		                'tooltip'       => '',
+		                'required'      => false,
+		                'default_value' => '0.00',
+		                'placeholder'   => '0.00',
+		                'min'           => '0',
+		                'class'         => 'extra-fees-input',
+		                'dependency'    => array(
+			                'live'      => true,
+			                'fields'    => array(
+				                array(
+					                'field' => 'enable_extra_fees',
+				                ),
+			                ),
+		                ),
+	                ),
+	                array(
+		                'name'          => 'venmo_fees',
+		                'type'          => 'text',
+		                'input_type'    => 'number',
+		                'label'         => esc_html__( 'Venmo', 'angelleye-gravity-forms-braintree' ),
+		                'tooltip'       => '',
+		                'required'      => false,
+		                'default_value' => '0.00',
+		                'placeholder'   => '0.00',
+		                'min'           => '0',
+		                'class'         => 'extra-fees-input',
+		                'dependency'    => array(
+			                'live'      => true,
+			                'fields'    => array(
+				                array(
+					                'field' => 'enable_extra_fees',
+				                ),
+			                ),
+		                ),
+	                ),
+	                /*array(
+		                'name'          => 'google_pay_fees',
+		                'type'          => 'text',
+		                'input_type'    => 'number',
+		                'label'         => esc_html__( 'Google Pay', 'angelleye-gravity-forms-braintree' ),
+		                'tooltip'       => '',
+		                'required'      => false,
+		                'default_value' => '0.00',
+		                'placeholder'   => '0.00',
+		                'min'           => '0',
+		                'class'         => 'extra-fees-input',
+		                'dependency'    => array(
+			                'live'      => true,
+			                'fields'    => array(
+				                array(
+					                'field' => 'enable_extra_fees',
+				                ),
+			                ),
+		                ),
+	                ),
+	                array(
+		                'name'          => 'apple_pay_fees',
+		                'type'          => 'text',
+		                'input_type'    => 'number',
+		                'label'         => esc_html__( 'Apple Pay', 'angelleye-gravity-forms-braintree' ),
+		                'tooltip'       => '',
+		                'required'      => false,
+		                'default_value' => '0.00',
+		                'placeholder'   => '0.00',
+		                'min'           => '0',
+		                'class'         => 'extra-fees-input',
+		                'dependency'    => array(
+			                'live'      => true,
+			                'fields'    => array(
+				                array(
+					                'field' => 'enable_extra_fees',
+				                ),
+			                ),
+		                ),
+	                ),*/
                 )
             )
         );

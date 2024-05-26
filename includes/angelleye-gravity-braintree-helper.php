@@ -128,9 +128,13 @@ function angelleye_get_extra_fees( $form_id ) {
     $extra_fees = [
         'is_fees_enable' => false,
         'title' => esc_html__( 'Convenience Fee', 'angelleye-gravity-forms-braintree' ),
-        'credit_card_fees' => '0',
-        'debit_card_fees' => '0',
-        'ach_fees' => '0',
+        'credit_card_fees' => 0.00,
+        'debit_card_fees' => 0.00,
+        'ach_fees' => 0.00,
+        'paypal_fees' => 0.00,
+        'venmo_fees' => 0.00,
+        'google_pay_fees' => 0.00,
+        'apple_pay_fees' => 0.00,
     ];
 
     if( empty( $form_id ) ) {
@@ -147,9 +151,13 @@ function angelleye_get_extra_fees( $form_id ) {
                 $extra_fees['title'] = $settings['extra_fee_label'];
             }
             $extra_fees['is_fees_enable'] =  $settings['enable_extra_fees'];
-            $extra_fees['credit_card_fees'] =  !empty( $settings['credit_card_fees'] ) ? get_gfb_format_price( $settings['credit_card_fees'], false) : '';
-            $extra_fees['debit_card_fees'] =  !empty( $settings['debit_card_fees'] ) ? get_gfb_format_price( $settings['debit_card_fees'],  false) : '';
-            $extra_fees['ach_fees'] =  !empty( $settings['ach_fees'] ) ? get_gfb_format_price( $settings['ach_fees'], false ) : '';
+            $extra_fees['credit_card_fees'] =  !empty( $settings['credit_card_fees'] ) ? get_gfb_format_price( $settings['credit_card_fees'], false) : 0.00;
+            $extra_fees['debit_card_fees'] =  !empty( $settings['debit_card_fees'] ) ? get_gfb_format_price( $settings['debit_card_fees'],  false) : 0.00;
+            $extra_fees['ach_fees'] =  !empty( $settings['ach_fees'] ) ? get_gfb_format_price( $settings['ach_fees'], false ) : 0.00;
+	        $extra_fees['paypal_fees'] = !empty( $settings['paypal_fees'] ) ? get_gfb_format_price( $settings['paypal_fees'], false ) : 0.00;
+	        $extra_fees['venmo_fees'] = !empty( $settings['venmo_fees'] ) ? get_gfb_format_price( $settings['venmo_fees'], false ) : 0.00;
+	        $extra_fees['google_pay_fees'] = !empty( $settings['google_pay_fees'] ) ? get_gfb_format_price( $settings['google_pay_fees'], false ) : 0.00;
+	        $extra_fees['apple_pay_fees'] = !empty( $settings['apple_pay_fees'] ) ? get_gfb_format_price( $settings['apple_pay_fees'], false ) : 0.00;
         }
 
         $form = GFAPI::get_form( $form_id );
@@ -168,12 +176,19 @@ function angelleye_get_extra_fees( $form_id ) {
                 $extra_fees['credit_card_fees'] = !empty( $feed_meta['credit_card_fees'] ) ? get_gfb_format_price( $feed_meta['credit_card_fees'], false) : 0.00;
                 $extra_fees['debit_card_fees'] = !empty( $feed_meta['debit_card_fees'] ) ? get_gfb_format_price( $feed_meta['debit_card_fees'], false) : 0.00;
                 $extra_fees['ach_fees'] = !empty( $feed_meta['ach_fees'] ) ? $feed_meta['ach_fees'] : 0.00;
+	            $extra_fees['paypal_fees'] = !empty( $feed_meta['paypal_fees'] ) ? $feed_meta['paypal_fees'] : 0.00;
+	            $extra_fees['venmo_fees'] = !empty( $feed_meta['venmo_fees'] ) ? $feed_meta['venmo_fees'] : 0.00;
+	            $extra_fees['google_pay_fees'] = !empty( $feed_meta['google_pay_fees'] ) ? $feed_meta['google_pay_fees'] : 0.00;
+	            $extra_fees['apple_pay_fees'] = !empty( $feed_meta['apple_pay_fees'] ) ? $feed_meta['apple_pay_fees'] : 0.00;
             } else {
                 $extra_fees['credit_card_fees'] = 0.00;
                 $extra_fees['debit_card_fees'] = 0.00;
                 $extra_fees['ach_fees'] = 0.00;
+                $extra_fees['paypal_fees'] = 0.00;
+                $extra_fees['venmo_fees'] = 0.00;
+                $extra_fees['google_pay_fees'] = 0.00;
+                $extra_fees['apple_pay_fees'] = 0.00;
             }
-
         }
 
     } catch (Exception $e) {
@@ -323,12 +338,20 @@ function get_gfb_prices( $args = [] ) {
 
     $extra_fee_amount = 0;
     if( !empty( $is_fees_enable ) && !empty( $card_type ) && $card_type === 'CreditCard' ) {
-        $extra_fee_amount = !empty( $extra_fees['credit_card_fees'] ) ? $extra_fees['credit_card_fees'] : '';
+        $extra_fee_amount = !empty( $extra_fees['credit_card_fees'] ) ? $extra_fees['credit_card_fees'] : 0.00;
     } elseif ( !empty( $is_fees_enable ) && !empty( $card_type ) && $card_type === 'DebitCard' ) {
-        $extra_fee_amount = !empty( $extra_fees['debit_card_fees'] ) ? $extra_fees['debit_card_fees'] : '';
+        $extra_fee_amount = !empty( $extra_fees['debit_card_fees'] ) ? $extra_fees['debit_card_fees'] : 0.00;
     } elseif ( !empty( $is_fees_enable ) && !empty( $card_type ) && $card_type === 'ACH' ) {
-        $extra_fee_amount = !empty( $extra_fees['ach_fees'] ) ? $extra_fees['ach_fees'] : '';
-    }
+        $extra_fee_amount = !empty( $extra_fees['ach_fees'] ) ? $extra_fees['ach_fees'] : 0.00;
+    } elseif ( !empty( $is_fees_enable ) && !empty( $card_type ) && $card_type === 'PayPalAccount' ) {
+	    $extra_fee_amount = !empty( $extra_fees['paypal_fees'] ) ? $extra_fees['paypal_fees'] : 0.00;
+    } elseif ( !empty( $is_fees_enable ) && !empty( $card_type ) && $card_type === 'VenmoAccount' ) {
+	    $extra_fee_amount = !empty( $extra_fees['venmo_fees'] ) ? $extra_fees['venmo_fees'] : 0.00;
+    } /*elseif ( !empty( $is_fees_enable ) && !empty( $card_type ) && $card_type === 'GooglePayCard' ) {
+	    $extra_fee_amount = !empty( $extra_fees['google_pay_fees'] ) ? $extra_fees['google_pay_fees'] : 0.00;
+    }  elseif ( !empty( $is_fees_enable ) && !empty( $card_type ) && $card_type === 'ApplePayCard' ) {
+	    $extra_fee_amount = !empty( $extra_fees['apple_pay_fees'] ) ? $extra_fees['apple_pay_fees'] : 0.00;
+    }*/
 
     $subtotal = 0;
     if( !empty( $products ) && is_array( $products ) ) {
