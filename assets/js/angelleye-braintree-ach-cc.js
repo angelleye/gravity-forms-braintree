@@ -588,7 +588,7 @@ function loadBraintreeDropIn( form_id, args = [] ) {
         });
     }
 
-    if (undefined !== paymentMethods && undefined !== paymentMethods.google_pay && 1 === parseInt(paymentMethods.google_pay)) {
+    /*if (undefined !== paymentMethods && undefined !== paymentMethods.google_pay && 1 === parseInt(paymentMethods.google_pay)) {
 
         if( formTotalAmount > 0 ) {
             dropInArgs.googlePay = {
@@ -601,9 +601,9 @@ function loadBraintreeDropIn( form_id, args = [] ) {
                 }
             }
         }
-    }
+    }*/
 
-    if (undefined !== paymentMethods && undefined !== paymentMethods.apple_pay && 1 === parseInt(paymentMethods.apple_pay)) {
+    /*if (undefined !== paymentMethods && undefined !== paymentMethods.apple_pay && 1 === parseInt(paymentMethods.apple_pay)) {
 
         if( formTotalAmount > 0 ) {
             dropInArgs.applePay = {
@@ -615,7 +615,7 @@ function loadBraintreeDropIn( form_id, args = [] ) {
                 }
             };
         }
-    }
+    }*/
     
     braintree.dropin.create( dropInArgs , (error, dropinInstance) => {
         if (error) console.error(error);

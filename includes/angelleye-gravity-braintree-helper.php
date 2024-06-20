@@ -441,11 +441,17 @@ function get_braintree_payment_methods()  {
 	return [
 		'paypal' => __('PayPal', 'angelleye-gravity-forms-braintree'),
 		'venmo' => __('Venmo', 'angelleye-gravity-forms-braintree'),
-		'apple_pay' => __('Apple Pay', 'angelleye-gravity-forms-braintree'),
-		'google_pay' => __('Google Pay', 'angelleye-gravity-forms-braintree'),
+		/*'apple_pay' => __('Apple Pay', 'angelleye-gravity-forms-braintree'),
+		'google_pay' => __('Google Pay', 'angelleye-gravity-forms-braintree'),*/
 	];
 }
 
+/**
+ * Get available payment method lists using form id.
+ *
+ * @param int $form_id Get form id.
+ * @return array $available_payment_methods.
+ */
 function angelleye_get_payment_methods( $form_id ) {
 
 	if( empty( $form_id ) ) {
@@ -478,10 +484,16 @@ function angelleye_get_payment_methods( $form_id ) {
     return $available_payment_methods;
 }
 
+/**
+ * Get Google Pay merchant id using form id.
+ *
+ * @param int $form_id get form id.
+ * @return string $merchant_id.
+ */
 function angelleye_get_google_pay_merchant_id( $form_id ) {
 
 	if( empty( $form_id ) ) {
-		return [];
+		return '';
 	}
 
 	try {
@@ -495,7 +507,7 @@ function angelleye_get_google_pay_merchant_id( $form_id ) {
 
 	} catch ( Exception $e ) {
 
-		return [];
+		return '';
 	}
 
 	return $merchant_id;

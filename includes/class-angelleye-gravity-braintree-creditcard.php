@@ -29,6 +29,11 @@ if ( ! class_exists( 'Angelleye_Gravity_Braintree_CreditCard_Field' ) ) {
 			return __( 'Braintree Credit Card', 'angelleye-gravity-forms-braintree' );
 		}
 
+		/**
+         * Return the field description, for use in the form editor.
+         *
+		 * @return string
+		 */
 		public function get_form_editor_field_description() {
 			return sprintf( esc_attr__( 'Add a %s field to your form. Enable %s Payment method in your form. Default is Braintree Credit Card', 'angelleye-gravity-forms-braintree' ), $this->get_form_editor_field_title(), implode(', ', get_braintree_payment_methods()) );
 		}
@@ -121,7 +126,7 @@ if ( ! class_exists( 'Angelleye_Gravity_Braintree_CreditCard_Field' ) ) {
                     'container_id' => $dropin_container_id,
                     'nonce' => wp_create_nonce('preview-payment-nonce'),
                     'payment_methods'  => angelleye_get_payment_methods($form_id),
-                    'google_pay_merchant_id'  => angelleye_get_google_pay_merchant_id($form_id),
+                    //'google_pay_merchant_id'  => angelleye_get_google_pay_merchant_id($form_id),
                     'pricing_fields' => $pricing_fields,
                 ];
 
@@ -138,7 +143,7 @@ if ( ! class_exists( 'Angelleye_Gravity_Braintree_CreditCard_Field' ) ) {
                     jQuery( document ).ready(function() {
                         initBraintreeDropIn('<?php echo $form_id; ?>', <?php echo json_encode($gfb_obj); ?>);
 
-                        jQuery(document).on('change', '#gform_<?php echo $form_id; ?> input, #gform_<?php echo $form_id; ?> select', function(){
+                        /*jQuery(document).on('change', '#gform_<?php echo $form_id; ?> input, #gform_<?php echo $form_id; ?> select', function(){
                             var Gform = jQuery('#gform_<?php echo $form_id; ?>');
                             braintreeDropInAddLoader(Gform);
                             jQuery('#dropin-container_<?php echo $dropin_container_id; ?>').html('');
@@ -160,7 +165,7 @@ if ( ! class_exists( 'Angelleye_Gravity_Braintree_CreditCard_Field' ) ) {
 
                         function braintreeDropInRemoveLoader() {
                             jQuery('.loader-wrap').remove();
-                        }
+                        }*/
                     });
                 </script>
                 <?php

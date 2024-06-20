@@ -3,8 +3,8 @@ Contributors: angelleye, Plugify, hello@lukerollans.me, gravityplus
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=9CQZZGGMF78VY&source=url
 Tags: gravity form, gravity forms, credit card, credit cards, payment, payments, braintree
 Requires at least: 5.0
-Tested up to: 6.4.2
-Stable tag: 5.0.1
+Tested up to: 6.5.4
+Stable tag: 5.1.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -63,6 +63,11 @@ In the search field type Gravity Forms Braintree Payments and click Search Plugi
 4. List of active feeds on the current form.
 
 == Changelog ==
+
+= 5.1.0 - 06.19.2024 =
+* Feature - Added global and form level settings for PayPal and venmo Extra fees.
+* Feature - Added form level settings for Enable/Disable payment methods (PayPal and Venmo). Default is Credit Card.
+* Check the compatibility with latest WordPress version 6.5.4
 
 = 5.0.1 - 01.24.2024 =
 * Fix - Minor bug fixes
