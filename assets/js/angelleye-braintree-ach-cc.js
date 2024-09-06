@@ -648,30 +648,35 @@ function loadBraintreeDropIn( form_id, args = [] ) {
                     }
 
                     enableGformLoader(loaderEl);
-                    dropinInstance.requestPaymentMethod((error, payload) => {
+                    var dropinField = document.querySelector('#gform_' + form_id + ' .gfield--type-braintree_credit_card');
+                    if(dropinField && getComputedStyle(dropinField).display !== 'none') {
+                        dropinInstance.requestPaymentMethod((error, payload) => {
 
-                        if (error) {
-                            console.error(error);
-                            removeGformLoader(form_id);
-                        } else {
-                            document.getElementById('nonce_'+form_id).value = payload.nonce;
-                            let binDataDebit = payload?.binData?.debit;
-
-                            let paymentCardType = payload.type;
-                            if( undefined !== binDataDebit && binDataDebit.toLowerCase() === 'yes' || binDataDebit === true) {
-                                paymentCardType = 'DebitCard';
-                            }
-                            document.getElementById('payment_card_type_'+form_id).value = paymentCardType;
-                            let cardType = payload.details.cardType;
-                            let cardLastFour = payload.details.lastFour;
-                            document.getElementById('payment_card_details_'+form_id).value = cardLastFour+" ("+cardType+")";
-                            if( args.is_fees_enable ) {
-                                managePreviewBeforePayment(payload, form_id, args);
+                            if (error) {
+                                console.error(error);
+                                removeGformLoader(form_id);
                             } else {
-                                document.getElementById('gform_'+form_id).submit();
+                                document.getElementById('nonce_'+form_id).value = payload.nonce;
+                                let binDataDebit = payload?.binData?.debit;
+
+                                let paymentCardType = payload.type;
+                                if( undefined !== binDataDebit && binDataDebit.toLowerCase() === 'yes' || binDataDebit === true) {
+                                    paymentCardType = 'DebitCard';
+                                }
+                                document.getElementById('payment_card_type_'+form_id).value = paymentCardType;
+                                let cardType = payload.details.cardType;
+                                let cardLastFour = payload.details.lastFour;
+                                document.getElementById('payment_card_details_'+form_id).value = cardLastFour+" ("+cardType+")";
+                                if( args.is_fees_enable ) {
+                                    managePreviewBeforePayment(payload, form_id, args);
+                                } else {
+                                    document.getElementById('gform_'+form_id).submit();
+                                }
                             }
-                        }
-                    });
+                        });
+                    } else {
+                        document.getElementById('gform_'+form_id).submit();
+                    }
                 });
             });
         }
