@@ -145,7 +145,8 @@ if ( ! class_exists( 'Angelleye_Gravity_Braintree_CreditCard_Field' ) ) {
                 ob_start();
                 ?>
                 <div class='ginput_container gform_payment_method_options ginput_container_<?php echo $this->type; ?>' id='<?php echo $field_id; ?>'>
-                    <div id="dropin-container_<?php echo $dropin_container_id; ?>"></div>
+                    <?php // gform-theme__disable opts the Drop-in UI out of Gravity Forms' orbital theme reset/framework CSS (the `all:unset;display:revert` reset in gravity-forms-theme-reset.css otherwise strips the Drop-in's own styles, breaking its layout). ?>
+                    <div id="dropin-container_<?php echo $dropin_container_id; ?>" class="gform-theme__disable"></div>
                     <input type="hidden" id="nonce_<?php echo $form_id; ?>" name="payment_method_nonce"/>
                     <input type="hidden" id="payment_card_type_<?php echo $form_id; ?>" name="payment_card_type"/>
                     <input type="hidden" id="payment_card_details_<?php echo $form_id; ?>" name="input_<?php echo $input_field_id; ?>"/>

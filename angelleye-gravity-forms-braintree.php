@@ -70,6 +70,14 @@ class AngelleyeGravityFormsBraintree{
 
     public function enqueue_scripts() {
         wp_enqueue_style('gravity-forms-braintree', GRAVITY_FORMS_BRAINTREE_ASSET_URL . 'assets/css/gravity-forms-braintree-public.css');
+	    // Enqueue the Braintree Drop-in stylesheet explicitly. The Drop-in normally
+	    // injects this <link> at runtime as the first child of <head> (lowest cascade
+	    // priority and easily stripped by optimization plugins), which can leave the
+	    // payment UI completely unstyled. The href must match the version the Drop-in
+	    // JS builds and carry no ?ver= query string, so the Drop-in's own dedupe check
+	    // (document.querySelector('link[href="…dropin.min.css"]')) finds this one and
+	    // skips its runtime injection.
+	    wp_enqueue_style('braintreegateway-dropin', 'https://assets.braintreegateway.com/web/dropin/1.46.1/css/dropin.min.css', array(), null);
 	    wp_register_script('braintreegateway-dropin', "https://js.braintreegateway.com/web/dropin/1.46.1/js/dropin.min.js");
 	    wp_enqueue_script('braintreegateway-dropin');
     }
