@@ -707,7 +707,7 @@ function initBraintreeDropIn( form_id, args = [] ) {
                 // console.log("Braintree is now loaded.");
                 loadBraintreeDropIn( form_id, args );
             };
-            script.src = 'https://js.braintreegateway.com/web/dropin/1.42.0/js/dropin.min.js';
+            script.src = 'https://js.braintreegateway.com/web/dropin/1.46.1/js/dropin.min.js';
             document.head.appendChild(script);
         } else {
             loadBraintreeDropIn( form_id, args );

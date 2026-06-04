@@ -974,7 +974,7 @@ final class Plugify_GForm_Braintree extends GFPaymentAddOn {
 
             foreach ( $settings as $setting ) {
 
-                if( !empty( $setting ) && $setting['title'] === 'Other Settings' ) {
+                if( !empty( $setting ) && isset( $setting['title'] ) && $setting['title'] === 'Other Settings' ) {
                     $temp_settings[] = $merchant_settings;
                     $temp_settings[] = $extra_fee_settings;
                     $temp_settings[] = $payment_methods_settings;
@@ -1461,7 +1461,7 @@ final class Plugify_GForm_Braintree extends GFPaymentAddOn {
         $scripts = array(
             array(
                 'handle' => 'angelleye-gravity-form-braintree-client',
-                'src' => 'https://js.braintreegateway.com/web/3.61.0/js/client.min.js',
+                'src' => 'https://js.braintreegateway.com/web/3.142.0/js/client.min.js',
                 'version' => $this->_version,
                 'deps' => array('jquery'),
                 'in_footer' => false,
@@ -1472,7 +1472,7 @@ final class Plugify_GForm_Braintree extends GFPaymentAddOn {
             ),
             array(
                 'handle' => 'angelleye-gravity-form-braintree-data-collector',
-                'src' => 'https://js.braintreegateway.com/web/3.61.0/js/data-collector.min.js',
+                'src' => 'https://js.braintreegateway.com/web/3.142.0/js/data-collector.min.js',
                 'version' => $this->_version,
                 'deps' => array(),
                 'in_footer' => false,
@@ -1483,7 +1483,7 @@ final class Plugify_GForm_Braintree extends GFPaymentAddOn {
             ),
             array(
                 'handle' => 'angelleye-gravity-form-braintree-usbankaccount',
-                'src' => 'https://js.braintreegateway.com/web/3.61.0/js/us-bank-account.min.js',
+                'src' => 'https://js.braintreegateway.com/web/3.142.0/js/us-bank-account.min.js',
                 'version' => $this->_version,
                 'deps' => array(),
                 'in_footer' => false,

@@ -78,10 +78,22 @@ if ( ! class_exists( 'Angelleye_Gravity_Braintree_CreditCard_Field' ) ) {
 		 */
 		public function get_field_input( $form, $value = '', $entry = null ) {
 
-            try {
+            $is_entry_detail = $this->is_entry_detail();
+            $is_form_editor  = $this->is_form_editor();
 
-                $is_entry_detail = $this->is_entry_detail();
-                $is_form_editor  = $this->is_form_editor();
+            // In the form editor and entry detail views the Braintree Drop-in JS
+            // (which defines initBraintreeDropIn) is not enqueued, and a live
+            // payment UI is not appropriate there. Render a static placeholder
+            // instead of emitting the init script, which would otherwise throw
+            // "initBraintreeDropIn is not defined" and make a needless API call.
+            if ( $is_form_editor || $is_entry_detail ) {
+                return "<div class='ginput_container ginput_container_{$this->type}'>"
+                     . "<div class='gform-braintree-cc-placeholder' style='padding:10px;border:1px dashed #ccc;color:#555;'>"
+                     . esc_html__( 'Braintree Credit Card — the secure Drop-in payment UI is displayed on the live form.', 'angelleye-gravity-forms-braintree' )
+                     . "</div></div>";
+            }
+
+            try {
 
                 $form_id  = $form['id'];
                 $id       = intval( $this->id );
@@ -132,8 +144,7 @@ if ( ! class_exists( 'Angelleye_Gravity_Braintree_CreditCard_Field' ) ) {
 
                 ob_start();
                 ?>
-                <div class='ginput_container gform_payment_method_options ginput_container_<?php echo $this->type; ?>'
-                     id='<?php echo $field_id; ?>'>
+                <div class='ginput_container gform_payment_method_options ginput_container_<?php echo $this->type; ?>' id='<?php echo $field_id; ?>'>
                     <div id="dropin-container_<?php echo $dropin_container_id; ?>"></div>
                     <input type="hidden" id="nonce_<?php echo $form_id; ?>" name="payment_method_nonce"/>
                     <input type="hidden" id="payment_card_type_<?php echo $form_id; ?>" name="payment_card_type"/>

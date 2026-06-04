@@ -136,17 +136,19 @@ class AngelleyeGravityBraintreeFieldMapping
                 if ($first_label_position !== false) {
 
                     $mapping_page_link = add_query_arg([
+                        'page' => 'gf_edit_forms',
                         'view' => 'settings',
                         'subview' => 'braintree_mapping_settings_page',
                         'id' => $form_id
-                    ], menu_page_url('gf_edit_forms', false));
+                    ], admin_url('admin.php'));
 
                     if(!AngelleyeGravityFormsBraintree::isBraintreeFeedActive()) {
                         $feed_page_link = add_query_arg([
+                            'page' => 'gf_edit_forms',
                             'view' => 'settings',
                             'subview' => 'gravity-forms-braintree',
                             'id' => $form_id
-                        ], menu_page_url('gf_edit_forms', false));
+                        ], admin_url('admin.php'));
                         $add_text[] = "To process payments, please configure a <a target='_blank' href='$feed_page_link'>Braintree feed</a>.";
                     }
 
