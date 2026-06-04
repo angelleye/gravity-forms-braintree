@@ -1,5 +1,7 @@
 <?php
 
+// phpcs:disable
+
 namespace Braintree;
 
 /**
@@ -10,6 +12,7 @@ class Digest
 {
     public static function hexDigestSha1($key, $string)
     {
+        self::_assertKeyNotNull($key);
         if (function_exists('hash_hmac')) {
             return self::_builtInHmacSha1($string, $key);
         } else {
@@ -57,4 +60,12 @@ class Digest
 
         return sha1($outerPad . pack($pack, sha1($innerPad . $message)));
     }
+
+    private static function _assertKeyNotNull($key)
+    {
+        if (is_null($key)) {
+            throw new Exception\Configuration("HMAC key must not be null - privateKey is not configured.");
+        }
+    }
 }
+// phpcs:enable

@@ -1,12 +1,9 @@
-<?php
+<?php // phpcs:disable Generic.Commenting.DocComment.MissingShort
 
 namespace Braintree;
 
 /**
  * Braintree Gateway module
- *
- * @package    Braintree
- * @category   Resources
  */
 class Gateway
 {
@@ -22,6 +19,7 @@ class Gateway
      */
     public $graphQLClient;
 
+    // phpcs:ignore PEAR.Commenting.FunctionComment.Missing
     public function __construct($config)
     {
         if (is_array($config)) {
@@ -96,6 +94,15 @@ class Gateway
 
     /**
      *
+     * @return CustomerSessionGateway
+     */
+    public function customerSession()
+    {
+        return new CustomerSessionGateway($this->graphQLClient);
+    }
+
+    /**
+     *
      * @return DiscountGateway
      */
     public function discount()
@@ -123,11 +130,20 @@ class Gateway
 
     /**
      *
-     * @return MerchantGateway
+     * @return ExchangeRateQuoteGateway
      */
-    public function merchant()
+    public function exchangeRateQuote()
     {
-        return new MerchantGateway($this);
+        return new ExchangeRateQuoteGateway($this);
+    }
+
+    /**
+     *
+     * @return LocalPaymentContextGateway
+     */
+    public function localPaymentContext()
+    {
+        return new LocalPaymentContextGateway($this->graphQLClient);
     }
 
     /**
@@ -173,6 +189,24 @@ class Gateway
     public function payPalAccount()
     {
         return new PayPalAccountGateway($this);
+    }
+
+    /**
+     *
+     * @return PayPalPaymentResourceGateway
+     */
+    public function payPalPaymentResource()
+    {
+        return new PayPalPaymentResourceGateway($this);
+    }
+
+    /**
+     *
+     * @return SepaDirectDebitAccountGateway
+     */
+    public function sepaDirectDebitAccount()
+    {
+        return new SepaDirectDebitAccountGateway($this);
     }
 
     /**
@@ -263,5 +297,16 @@ class Gateway
     public function webhookTesting()
     {
         return new WebhookTestingGateway($this);
+    }
+
+    /**
+     * Returns a BankAccountInstantVerificationGateway for interacting with
+     * Bank Account Instant Verification functionality.
+     *
+     * @return BankAccountInstantVerificationGateway
+     */
+    public function bankAccountInstantVerification()
+    {
+        return new BankAccountInstantVerificationGateway($this);
     }
 }
