@@ -620,65 +620,93 @@ function loadBraintreeDropIn( form_id, args = [] ) {
     braintree.dropin.create( dropInArgs , (error, dropinInstance) => {
         if (error) console.error(error);
 
-        let gformBCCEle = 'gform_'+form_id;
-        let gformBCCEvent = 'submit';
-        if( undefined !== paymentMethodOptions && paymentMethodOptions.length > 0 ) {
-            gformBCCEle = 'gform_submit_button_bcc_' + form_id;
-            gformBCCEvent = 'click';
-        }
+        // How the submission is triggered depends on the form and the Gravity Forms version.
+        // GF 2.9+ submits via the submit button's onclick (gform.submission.handleButtonClick),
+        // which does NOT fire the form's native "submit" event, so the old form-"submit" listener
+        // never ran and the form posted WITHOUT the Braintree nonce. We must run BEFORE that onclick.
+        // A capture-phase listener on the button itself is not enough (at the target, listeners run
+        // in registration order, and GF's onclick attribute is registered first), so we attach the
+        // capture listener to the FORM — an ancestor capture listener runs before the button's onclick.
+        let hasToggle = ( undefined !== paymentMethodOptions && paymentMethodOptions.length > 0 );
 
-        let bccFormSubmit = document.querySelectorAll('#'+gformBCCEle);
+        // Complete the submission once the nonce is stored. Prefer Gravity Forms' own submission
+        // handler (GF 2.9+) so it sets the submission method/type and dedupe lock correctly; fall
+        // back to a native submit for older GF or when the dedicated toggle button is used.
+        let triggerSubmit = function () {
+            let gfBtn = document.getElementById('gform_submit_button_' + form_id);
+            if( ! hasToggle && gfBtn && window.gform && gform.submission && typeof gform.submission.handleButtonClick === 'function' ) {
+                gform.submission.handleButtonClick(gfBtn);
+            } else {
+                document.getElementById('gform_'+form_id).submit();
+            }
+        };
 
-        if( undefined !== bccFormSubmit && bccFormSubmit.length > 0 ) {
+        // Shared flow: show loader, fetch the Braintree nonce, store it, then submit.
+        let processBraintreeSubmit = function () {
+            let gFormAjaxLoader = document.getElementById('gform_ajax_spinner_'+form_id);
+            if(undefined !== gFormAjaxLoader && null !== gFormAjaxLoader ) {
+                gFormAjaxLoader.remove();
+            }
 
-            bccFormSubmit.forEach(function (element) {
+            let loaderBtn = document.getElementById( hasToggle ? ('gform_submit_button_bcc_' + form_id) : ('gform_submit_button_' + form_id) );
+            enableGformLoader(loaderBtn);
 
-                element.addEventListener(gformBCCEvent, event => {
-                    event.preventDefault();
+            var dropinField = document.querySelector('#gform_' + form_id + ' .gfield--type-braintree_credit_card');
+            if(dropinField && getComputedStyle(dropinField).display !== 'none') {
+                dropinInstance.requestPaymentMethod((error, payload) => {
 
-                    let gFormAjaxLoader = document.getElementById('gform_ajax_spinner_'+form_id);
-                    if(undefined !== gFormAjaxLoader && null !== gFormAjaxLoader ) {
-                        gFormAjaxLoader.remove();
-                    }
-
-                    let loaderEl = element;
-                    if( gformBCCEvent === 'submit' ) {
-                        let currentGform = document.getElementById(gformBCCEle);
-                        loaderEl = currentGform?.querySelector('.gform_footer #gform_submit_button_'+form_id);
-                    }
-
-                    enableGformLoader(loaderEl);
-                    var dropinField = document.querySelector('#gform_' + form_id + ' .gfield--type-braintree_credit_card');
-                    if(dropinField && getComputedStyle(dropinField).display !== 'none') {
-                        dropinInstance.requestPaymentMethod((error, payload) => {
-
-                            if (error) {
-                                console.error(error);
-                                removeGformLoader(form_id);
-                            } else {
-                                document.getElementById('nonce_'+form_id).value = payload.nonce;
-                                let binDataDebit = payload?.binData?.debit;
-
-                                let paymentCardType = payload.type;
-                                if( undefined !== binDataDebit && binDataDebit.toLowerCase() === 'yes' || binDataDebit === true) {
-                                    paymentCardType = 'DebitCard';
-                                }
-                                document.getElementById('payment_card_type_'+form_id).value = paymentCardType;
-                                let cardType = payload.details.cardType;
-                                let cardLastFour = payload.details.lastFour;
-                                document.getElementById('payment_card_details_'+form_id).value = cardLastFour+" ("+cardType+")";
-                                if( args.is_fees_enable ) {
-                                    managePreviewBeforePayment(payload, form_id, args);
-                                } else {
-                                    document.getElementById('gform_'+form_id).submit();
-                                }
-                            }
-                        });
+                    if (error) {
+                        console.error(error);
+                        removeGformLoader(form_id);
                     } else {
-                        document.getElementById('gform_'+form_id).submit();
+                        document.getElementById('nonce_'+form_id).value = payload.nonce;
+                        let binDataDebit = payload?.binData?.debit;
+
+                        let paymentCardType = payload.type;
+                        if( undefined !== binDataDebit && binDataDebit.toLowerCase() === 'yes' || binDataDebit === true) {
+                            paymentCardType = 'DebitCard';
+                        }
+                        document.getElementById('payment_card_type_'+form_id).value = paymentCardType;
+                        let cardType = payload.details?.cardType || '';
+                        let cardLastFour = payload.details?.lastFour || '';
+                        document.getElementById('payment_card_details_'+form_id).value = cardLastFour+" ("+cardType+")";
+                        if( args.is_fees_enable ) {
+                            managePreviewBeforePayment(payload, form_id, args);
+                        } else {
+                            triggerSubmit();
+                        }
                     }
                 });
-            });
+            } else {
+                triggerSubmit();
+            }
+        };
+
+        if( hasToggle ) {
+            // A payment-method toggle field is present: a dedicated button drives the CC flow.
+            let bccBtn = document.getElementById('gform_submit_button_bcc_' + form_id);
+            if( bccBtn ) {
+                bccBtn.addEventListener('click', function (event) {
+                    event.preventDefault();
+                    processBraintreeSubmit();
+                });
+            }
+        } else {
+            // Intercept the submit button click on the FORM in the capture phase, before GF's
+            // onclick (gform.submission.handleButtonClick) can post the form without the nonce.
+            let formEl = document.getElementById('gform_' + form_id);
+            let submitBtn = document.getElementById('gform_submit_button_' + form_id);
+            if( formEl && submitBtn ) {
+                formEl.addEventListener('click', function (event) {
+                    let t = event.target;
+                    if( ! t || ( t !== submitBtn && ! ( t.closest && t.closest('#gform_submit_button_' + form_id) ) ) ) {
+                        return; // not the submit button — ignore
+                    }
+                    event.preventDefault();
+                    event.stopImmediatePropagation(); // prevent the button's onclick from submitting yet
+                    processBraintreeSubmit();
+                }, true);
+            }
         }
     });
 }
