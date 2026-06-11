@@ -1,4 +1,4 @@
-<?php
+<?php // phpcs:disable Generic.Commenting.DocComment.MissingShort
 
 namespace Braintree\Result;
 
@@ -23,10 +23,6 @@ use Braintree\Util;
  *     // Error
  * }
  * </code>
- *
- *
- * @package    Braintree
- * @subpackage Result
  */
 class Successful extends Instance
 {
@@ -41,11 +37,7 @@ class Successful extends Instance
      */
     private $_returnObjectNames;
 
-    /**
-     * @ignore
-     * @param array|null $objsToReturn
-     * @param array|null $propertyNames
-     */
+    // phpcs:ignore PEAR.Commenting.FunctionComment.Missing
     public function __construct($objsToReturn = [], $propertyNames = [])
     {
         // Sanitize arguments (preserves backwards compatibility)
@@ -69,11 +61,21 @@ class Successful extends Instance
         }
     }
 
-   /**
-    *
-    * @ignore
-    * @return string string representation of the object's structure
-    */
+    /**
+     * Implementation of JsonSerializable
+     *
+     * @return array
+     */
+    public function jsonSerialize()
+    {
+        $data = ['success' => $this->success];
+        foreach ($this->_returnObjectNames as $returnObjectName) {
+            $data[$returnObjectName] = $this->$returnObjectName;
+        }
+        return $data;
+    }
+
+    // phpcs:ignore PEAR.Commenting.FunctionComment.Missing
     public function __toString()
     {
         $objects = [];

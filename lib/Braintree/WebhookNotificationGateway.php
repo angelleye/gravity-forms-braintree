@@ -2,15 +2,31 @@
 
 namespace Braintree;
 
+/**
+ * Braintree WebhookNotificationGateway
+ * Manages Webhooks
+ */
 class WebhookNotificationGateway
 {
+    private $config;
 
+    // phpcs:ignore PEAR.Commenting.FunctionComment.Missing
     public function __construct($gateway)
     {
         $this->config = $gateway->config;
-        $this->config->assertHasAccessTokenOrKeys();
+        $this->config->assertHasKeys();
     }
 
+    /**
+     * Parses a webhook from the Braintree API
+     *
+     * @param string $signature used to verify before parsing
+     * @param mixed  $payload   to be parsed
+     *
+     * @throws Exception\InvalidSignature
+     *
+     * @return WebhookNotification object
+     */
     public function parse($signature, $payload)
     {
         if (is_null($signature)) {
@@ -32,6 +48,15 @@ class WebhookNotificationGateway
         return WebhookNotification::factory($attributes['notification']);
     }
 
+    /*
+     * Verify a webhook challenge
+     *
+     * @param object $challenge to be verified
+     *
+     * @throws Exception\InvalidChallenge
+     *
+     * @return string
+     */
     public function verify($challenge)
     {
         if (!preg_match('/^[a-f0-9]{20,32}$/', $challenge)) {
@@ -65,7 +90,7 @@ class WebhookNotificationGateway
     {
         foreach ($signaturePairs as $pair) {
             $components = preg_split("/\|/", $pair);
-            if ($components[0] == $this->config->getPublicKey()) {
+            if (count($components) >= 2 && $components[0] === $this->config->getPublicKey()) {
                 return $components[1];
             }
         }

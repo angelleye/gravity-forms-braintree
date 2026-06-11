@@ -3,24 +3,17 @@
 namespace Braintree;
 
 /**
- * Braintree PaymentMethodParser module
- *
- * @package    Braintree
- * @category   Resources
- */
-
-/**
- * Manages Braintree PaymentMethodParser
- *
- * <b>== More information ==</b>
- *
- *
- * @package    Braintree
- * @category   Resources
- *
+ * Manages Braintree PaymentMethodParser module
  */
 class PaymentMethodParser
 {
+    /**
+     * Creates instances of the payment method in the response object
+     *
+     * @param mixed $response from Braintree API
+     *
+     * @return mixed|Exception
+     */
     public static function parsePaymentMethod($response)
     {
         if (isset($response['creditCard'])) {
@@ -36,9 +29,13 @@ class PaymentMethodParser
         } elseif (isset($response['venmoAccount'])) {
             return VenmoAccount::factory($response['venmoAccount']);
         } elseif (isset($response['visaCheckoutCard'])) {
+            // NEXT_MAJOR_VERSION remove VisaCheckoutCard
             return VisaCheckoutCard::factory($response['visaCheckoutCard']);
         } elseif (isset($response['samsungPayCard'])) {
-            return SamsungPayCard::factory($response['samsungPayCard']);
+            // NEXT_MAJOR_VERSION remove samsungPayCard
+            return SamsungPayCard::factory($response['samsungPayCard']); // Deprecated
+        } elseif (isset($response['sepaDebitAccount'])) {
+            return SepaDirectDebitAccount::factory($response['sepaDebitAccount']);
         } elseif (is_array($response)) {
             return UnknownPaymentMethod::factory($response);
         } else {

@@ -7,9 +7,14 @@ use Braintree\Version;
 use Braintree\Configuration;
 use finfo;
 
+/**
+ * Braintree Curl module
+ *
+ * Faciliates curl requests made by the SDK
+ */
 class Curl
 {
-    // phpcs:ignore Generic.Files.LineLength
+    // phpcs:ignore Generic.Files.LineLength, PEAR.Commenting.FunctionComment.Missing
     public static function makeRequest($httpVerb, $url, $config, $httpRequest, $requestBody = null, $file = null, $customHeaders = null, $useClientCredentials = false)
     {
         $httpRequest->setOption(CURLOPT_TIMEOUT, $config->getTimeout());
@@ -83,12 +88,15 @@ class Curl
         }
 
         $httpRequest->close();
+        if (is_null($error)) {
+            $error = "";
+        }
         if ($config->sslOn() && $errorCode == 35) {
             throw new Exception\SSLCertificate($error, $errorCode);
         }
 
         if ($errorCode) {
-            throw new Exception\Connection($error, $errorCode);
+            throw new Exception\Connection($error, $httpStatus ?? 0);
         }
 
         return ['status' => $httpStatus, 'body' => $response];

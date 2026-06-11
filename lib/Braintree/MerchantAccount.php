@@ -1,16 +1,9 @@
-<?php
+<?php //phpcs:disable
 
 namespace Braintree;
 
 /**
- * @property-read \Braintree\MerchantAccount\BusinessDetails $businessDetails
- * @property-read string $currencyIsoCode
- * @property-read boolean $default
- * @property-read \Braintree\MerchantAccount\FundingDetails $fundingDetails
- * @property-read string $id
- * @property-read \Braintree\MerchantAccount\IndividualDetails $individualDetails
- * @property-read \Braintree\MerchantAccount $masterMerchantAccount
- * @property-read string $status
+ * See our {@link https://developer.paypal.com/braintree/docs/reference/response/merchant-account developer docs} for information on attributes
  */
 class MerchantAccount extends Base
 {
@@ -22,6 +15,13 @@ class MerchantAccount extends Base
     const FUNDING_DESTINATION_EMAIL = 'email';
     const FUNDING_DESTINATION_MOBILE_PHONE = 'mobile_phone';
 
+    /**
+     * Creates an instance from given attributes
+     *
+     * @param array $attributes response object attributes
+     *
+     * @return MerchantAccount
+     */
     public static function factory($attributes)
     {
         $instance = new self();
@@ -33,42 +33,15 @@ class MerchantAccount extends Base
     {
         $this->_attributes = $merchantAccountAttribs;
 
-        if (isset($merchantAccountAttribs['individual'])) {
-            $individual = $merchantAccountAttribs['individual'];
-            $this->_set('individualDetails', MerchantAccount\IndividualDetails::Factory($individual));
-        }
-
-        if (isset($merchantAccountAttribs['business'])) {
-            $business = $merchantAccountAttribs['business'];
-            $this->_set('businessDetails', MerchantAccount\BusinessDetails::Factory($business));
-        }
-
-        if (isset($merchantAccountAttribs['funding'])) {
-            $funding = $merchantAccountAttribs['funding'];
-            $this->_set('fundingDetails', new MerchantAccount\FundingDetails($funding));
-        }
-
-        if (isset($merchantAccountAttribs['masterMerchantAccount'])) {
-            $masterMerchantAccount = $merchantAccountAttribs['masterMerchantAccount'];
-            $this->_set('masterMerchantAccount', self::Factory($masterMerchantAccount));
-        }
     }
 
 
     // static methods redirecting to gateway
 
-    public static function create($attribs)
-    {
-        return Configuration::gateway()->merchantAccount()->create($attribs);
-    }
 
     public static function find($merchant_account_id)
     {
         return Configuration::gateway()->merchantAccount()->find($merchant_account_id);
     }
 
-    public static function update($merchant_account_id, $attributes)
-    {
-        return Configuration::gateway()->merchantAccount()->update($merchant_account_id, $attributes);
-    }
 }

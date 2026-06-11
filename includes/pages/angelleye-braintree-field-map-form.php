@@ -81,10 +81,11 @@ foreach ($gravity_fields as $gravity_field) {
 <?php
 if(!AngelleyeGravityFormsBraintree::isBraintreeFeedActive()) {
     $feed_page_link = add_query_arg([
+        'page' => 'gf_edit_forms',
         'view' => 'settings',
         'subview' => 'gravity-forms-braintree',
         'id' => $form_id
-    ], menu_page_url('gf_edit_forms', false));
+    ], admin_url('admin.php'));
 
     echo "<div style='background-color: #f5e5cd;padding: 10px;color: #000;opacity: 0.83;transition: opacity 0.6s;margin:10px 0;'><p style='margin: 0'> Please make sure to configure the <a href='$feed_page_link'>Braintree feed</a> to process the payments.</p></div>";
 }?>

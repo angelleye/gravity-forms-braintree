@@ -19,6 +19,14 @@ final class Plugify_GForm_Braintree extends GFPaymentAddOn {
     protected $selected_payment_method = 'braintree_credit_card';
 
     /**
+     * Legacy args passed to the deprecated gform_braintree_post_capture hook. Braintree does not
+     * populate these (they originate from an Authorize.net AIM-style integration), so they default
+     * to null; declaring the property avoids "undefined property" warnings while keeping the hook
+     * signature intact for any third-party code still listening to it.
+     */
+    protected $_args_for_deprecated_hooks = array( 'config' => null, 'aim_response' => null );
+
+    /**
      * Class constructor. Send __construct call to parent
      * @since 1.0
      * @return void
@@ -293,6 +301,16 @@ final class Plugify_GForm_Braintree extends GFPaymentAddOn {
      * @throws \Braintree\Exception\Configuration
      */
     public function braintree_cc_authorize($feed, $submission_data, $form, $entry) {
+        // Request logging: capture the incoming payment state so we can see exactly what
+        // is (or isn't) being passed to Braintree. The nonce is a one-time token (safe to
+        // log); raw card data never reaches $_POST with Drop-in, only the nonce.
+        $this->log_debug( __METHOD__ . '(): Incoming request => ' . print_r( array(
+            'selected_payment_method' => $this->selected_payment_method,
+            'payment_method_nonce'    => empty( $_POST['payment_method_nonce'] ) ? 'EMPTY' : ( 'present (len ' . strlen( $_POST['payment_method_nonce'] ) . ')' ),
+            'payment_card_type'       => isset( $_POST['payment_card_type'] ) ? $_POST['payment_card_type'] : 'unset',
+            'payment_amount'          => isset( $submission_data['payment_amount'] ) ? $submission_data['payment_amount'] : 'unset',
+            'post_keys'               => array_keys( $_POST ),
+        ), 1 ) );
         try {
             $settings = $this->get_plugin_settings();
             $gateway = $this->getBraintreeGateway();
@@ -309,6 +327,7 @@ final class Plugify_GForm_Braintree extends GFPaymentAddOn {
                     )
                 );
                 if (empty($_POST['payment_method_nonce'])) {
+                    $this->log_debug( __METHOD__ . '(): Aborting before sale — payment_method_nonce is EMPTY. The Drop-in did not submit a payment nonce. POST keys present: ' . implode( ', ', array_keys( $_POST ) ) );
                     return $authorization;
                 }
                 $args = array(
@@ -974,7 +993,7 @@ final class Plugify_GForm_Braintree extends GFPaymentAddOn {
 
             foreach ( $settings as $setting ) {
 
-                if( !empty( $setting ) && $setting['title'] === 'Other Settings' ) {
+                if( !empty( $setting ) && isset( $setting['title'] ) && $setting['title'] === 'Other Settings' ) {
                     $temp_settings[] = $merchant_settings;
                     $temp_settings[] = $extra_fee_settings;
                     $temp_settings[] = $payment_methods_settings;
@@ -1461,7 +1480,7 @@ final class Plugify_GForm_Braintree extends GFPaymentAddOn {
         $scripts = array(
             array(
                 'handle' => 'angelleye-gravity-form-braintree-client',
-                'src' => 'https://js.braintreegateway.com/web/3.61.0/js/client.min.js',
+                'src' => 'https://js.braintreegateway.com/web/3.142.0/js/client.min.js',
                 'version' => $this->_version,
                 'deps' => array('jquery'),
                 'in_footer' => false,
@@ -1472,7 +1491,7 @@ final class Plugify_GForm_Braintree extends GFPaymentAddOn {
             ),
             array(
                 'handle' => 'angelleye-gravity-form-braintree-data-collector',
-                'src' => 'https://js.braintreegateway.com/web/3.61.0/js/data-collector.min.js',
+                'src' => 'https://js.braintreegateway.com/web/3.142.0/js/data-collector.min.js',
                 'version' => $this->_version,
                 'deps' => array(),
                 'in_footer' => false,
@@ -1483,7 +1502,7 @@ final class Plugify_GForm_Braintree extends GFPaymentAddOn {
             ),
             array(
                 'handle' => 'angelleye-gravity-form-braintree-usbankaccount',
-                'src' => 'https://js.braintreegateway.com/web/3.61.0/js/us-bank-account.min.js',
+                'src' => 'https://js.braintreegateway.com/web/3.142.0/js/us-bank-account.min.js',
                 'version' => $this->_version,
                 'deps' => array(),
                 'in_footer' => false,
