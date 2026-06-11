@@ -3,8 +3,8 @@ Contributors: angelleye, Plugify, hello@lukerollans.me, gravityplus
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=9CQZZGGMF78VY&source=url
 Tags: gravity form, gravity forms, credit card, credit cards, payment, payments, braintree
 Requires at least: 5.0
-Tested up to: 6.5.4
-Stable tag: 5.1.2
+Tested up to: 7.0
+Stable tag: 6.0.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -14,7 +14,7 @@ Allow your customers to purchase goods and services through Gravity Forms via Br
 
 Braintree Payments is a payment gateway provider owned by PayPal which allows you to process credit card payments without the need for a bank merchant account and full PCI-compliance. No sensitive data such as credit card numbers are stored on your server, Braintree takes care of everything.
 
- > Requires at least WordPress 3.8 and Gravity Forms 1.8
+ > Requires at least WordPress 6.5 and Gravity Forms 2.5
 
 There are just a few simple steps to begin leveraging your Braintree Payments account:
 
@@ -63,6 +63,11 @@ In the search field type Gravity Forms Braintree Payments and click Search Plugi
 4. List of active feeds on the current form.
 
 == Changelog ==
+
+= 6.0.0 - 06.11.2026 =
+* Enhancement - Updated the Braintree payment library and added compatibility with Gravity Forms 2.9 and PHP 8.x. ([GFB-54](https://github.com/angelleye/gravity-forms-braintree/pull/54))
+* Fix - Resolved a payment form display issue and ensured payment tokens are correctly submitted with the order. ([GFB-54](https://github.com/angelleye/gravity-forms-braintree/pull/54))
+* Fix - Repaired broken links in the plugin settings page and removed JavaScript errors in the Gravity Forms form editor. ([GFB-54](https://github.com/angelleye/gravity-forms-braintree/pull/54))
 
 = 5.1.2 - 09.06.2024 =
 * Fix - Braintree form validation triggering even when GF field is hidden. ([GFB-49](https://github.com/angelleye/gravity-forms-braintree/pull/53))
