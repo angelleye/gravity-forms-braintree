@@ -64,13 +64,56 @@ final class Plugify_GForm_Braintree extends GFPaymentAddOn {
     }
 
     /**
-     * Override default message for Gravity Form Braintree Feeds
+     * Message shown on the Braintree feed list when the form has no Braintree payment field.
+     *
+     * Gravity Forms' payment framework hides the entire feed list (and blocks feed creation)
+     * until the form contains a supported payment field. The default wording ("...before
+     * creating a feed") is confusing when feeds already exist, because it reads as if the
+     * feeds are gone. This message instead reassures the user that their saved feeds are
+     * intact, explains why they are hidden, and links straight to the form editor.
+     *
      * @return string
      */
     public function requires_credit_card_message() {
-        $url = add_query_arg(array('view' => null, 'subview' => null));
 
-        return sprintf(esc_html__("You must add a Credit Card/ACH Payment field to your form before creating a feed. Let's go %sadd one%s!", 'gravityforms'), "<a href='" . esc_url($url) . "'>", '</a>');
+        $form    = $this->get_current_form();
+        $form_id = is_array($form) ? rgar($form, 'id') : 0;
+
+        // Link directly to the form editor so the user can add the field.
+        $add_field_url = $form_id
+            ? admin_url('admin.php?page=gf_edit_forms&id=' . $form_id)
+            : add_query_arg(array('view' => null, 'subview' => null));
+
+        $feed_count = $form_id ? count($this->get_feeds($form_id)) : 0;
+
+        if ($feed_count > 0) {
+            $intro = sprintf(
+                _n(
+                    'You have %d saved Braintree feed, but it can\'t be shown or processed until this form has a Braintree payment field.',
+                    'You have %d saved Braintree feeds, but they can\'t be shown or processed until this form has a Braintree payment field.',
+                    $feed_count,
+                    'angelleye-gravity-forms-braintree'
+                ),
+                $feed_count
+            );
+        } else {
+            $intro = esc_html__("This form doesn't have a Braintree payment field yet, so no feeds can be created or processed.", 'angelleye-gravity-forms-braintree');
+        }
+
+        $instructions = esc_html__('Add a Braintree Credit Card or Braintree ACH field to this form, then return to this page to view and manage your feeds.', 'angelleye-gravity-forms-braintree');
+        $button       = esc_html__('Edit form to add a field', 'angelleye-gravity-forms-braintree');
+
+        return sprintf(
+            '<div style="padding:12px 0;line-height:1.6;">'
+            . '<p style="margin:0 0 6px;font-weight:600;font-size:13px;">%1$s</p>'
+            . '<p style="margin:0 0 12px;">%2$s</p>'
+            . '<a class="button button-primary" href="%3$s">%4$s</a>'
+            . '</div>',
+            esc_html($intro),
+            $instructions,
+            esc_url($add_field_url),
+            $button
+        );
     }
 
     /**
