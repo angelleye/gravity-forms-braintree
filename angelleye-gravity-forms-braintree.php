@@ -39,6 +39,22 @@ if (!defined('PAYPAL_FOR_WOOCOMMERCE_PUSH_NOTIFICATION_WEB_URL')) {
 require_once dirname(__FILE__) . '/includes/angelleye-gravity-braintree-activator.php';
 require_once dirname(__FILE__) . '/includes/angelleye-plugin-requirement-checker.php';
 
+/**
+ * Shared AngellEYE push-notifications class. Self-contained — kept byte-identical to the
+ * copy in other AngellEYE plugins; the class_exists guard ensures only one copy loads.
+ * Replaces the previous inline implementation that fired a synchronous, uncached HTTP
+ * request on every admin page load.
+ */
+require_once dirname(__FILE__) . '/includes/notifications/class-angelleye-push-notifications.php';
+add_action('plugins_loaded', function () {
+    if (!is_admin() || !class_exists('AngellEYE_Push_Notifications')) {
+        return;
+    }
+    (new AngellEYE_Push_Notifications(array(
+        'plugin_slug' => 'angelleye-gravity-forms-braintree',
+    )))->register();
+}, 25);
+
 class AngelleyeGravityFormsBraintree{
 
     protected static $instance = null;
