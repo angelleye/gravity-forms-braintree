@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_i
 Tags: gravity form, gravity forms, credit card, credit cards, payment, payments, braintree
 Requires at least: 5.0
 Tested up to: 7.0
-Stable tag: 6.0.0
+Stable tag: 6.0.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -63,6 +63,10 @@ In the search field type Gravity Forms Braintree Payments and click Search Plugi
 4. List of active feeds on the current form.
 
 == Changelog ==
+
+= 6.0.1 - 07.08.2026 =
+* Enhancement - Clarified the Braintree feed list message and frontend display when a form has no payment/pricing field, so existing feeds are preserved and admins receive actionable guidance. ([GFB-56](https://github.com/angelleye/gravity-forms-braintree/pull/56))
+* Fix - Resolved push notification issue that caused delayed admin page loading by aligning the viewer with the standard AngellEye Push Notification class. ([GFB-55](https://github.com/angelleye/gravity-forms-braintree/pull/55))
 
 = 6.0.0 - 06.11.2026 =
 * Enhancement - Updated the Braintree payment library and added compatibility with Gravity Forms 2.9 and PHP 8.x. ([GFB-54](https://github.com/angelleye/gravity-forms-braintree/pull/54))
